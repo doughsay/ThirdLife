@@ -10,7 +10,7 @@ public class LifeWorld {
 	public HashMap<MemoKey, LifeNode> memo = new HashMap<MemoKey, LifeNode>();
 	private ArrayList<LifeNode> empty = new ArrayList<LifeNode>();
 	private int nextId;
-	private LifeNode root;
+	public LifeNode root;
 
 	public LifeWorld() {
 		LifeNode E, X;
