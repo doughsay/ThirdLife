@@ -11,22 +11,22 @@ public final class MemoKey {
 	}
 	
 	public int[] toArray() {
-		return new int[] {this.nwId, this.neId, this.swId, this.seId};
+		return new int[] {nwId, neId, swId, seId};
 	}
 
 	@Override
 	public String toString() {
-		return this.nwId+","+this.neId+","+this.swId+","+this.seId;
+		return nwId+","+neId+","+swId+","+seId;
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		MemoKey other = (MemoKey)obj;
-		return other.nwId == this.nwId && other.neId == this.neId && other.swId == this.swId && other.seId == this.seId;
+		return other.nwId == nwId && other.neId == neId && other.swId == swId && other.seId == seId;
 	}
 	
 	@Override
 	public int hashCode() {
-		return this.toString().hashCode();
+		return toString().hashCode();
 	}
 }

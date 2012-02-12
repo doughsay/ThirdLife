@@ -15,49 +15,52 @@ public class LifeWorld {
 	public LifeWorld() {
 		LifeNode E, X;
 
-		this.originx = 0;
-		this.originy = 0;
-		E = new LifeNode(this, 0, null);
-		X = new LifeNode(this, 1, null);
-		this.single[0] = E;
-		this.single[1] = X;
+		originx = 0;
+		originy = 0;
+		E = new LifeNode(this, 0);
+		X = new LifeNode(this, 1);
+		single[0] = E;
+		single[1] = X;
 
 		for(int i = 0; i < 16; i++) {
 			MemoKey key = new MemoKey(i & 1, (i & 2) / 2, (i & 4) / 4, (i & 8) / 8);
 			LifeNode children[] = new LifeNode[4];
 			for(int k = 0; k < 4; k++) {
-				children[k] = this.single[key.toArray()[k]];
+				children[k] = single[key.toArray()[k]];
 			}
-			this.memo.put(key, new LifeNode(this, i + 2, children));
+			memo.put(key, new LifeNode(this, i + 2, children));
 		}
 
-		this.empty.add(E);
-		this.empty.add(this.memo.get(new MemoKey(0,0,0,0)));
-		this.nextId = 18;
-		this.root = E;
+		empty.add(E);
+		empty.add(memo.get(new MemoKey(0,0,0,0)));
+		nextId = 18;
+		root = E;
 	}
 
 	public LifeNode getNode(LifeNode nw, LifeNode ne, LifeNode sw, LifeNode se) {
 		MemoKey key = new MemoKey(nw.id, ne.id, sw.id, se.id);
-		if(this.memo.containsKey(key)) {
-			return this.memo.get(key);
+		if(memo.containsKey(key)) {
+			return memo.get(key);
 		}
 		else {
-			LifeNode[] children = {nw, ne, sw, se};
-			LifeNode result = new LifeNode(this, this.nextId, children);
-			this.nextId++;
-			this.memo.put(key, result);
+			LifeNode result = new LifeNode(this, nextId, nw, ne, sw, se);
+			nextId++;
+			memo.put(key, result);
 			return result;
 		}
 	}
 
+	public LifeNode getNode(LifeNode[] children) {
+		return getNode(children[0], children[1], children[2], children[3]);
+	}
+
 	public LifeNode emptyNode(int level) {
-		if(level < this.empty.size()) {
-			return this.empty.get(level);
+		if(level < empty.size()) {
+			return empty.get(level);
 		}
-		LifeNode e = this.emptyNode(level - 1);
-		LifeNode result = this.getNode(e, e, e, e);
-		this.empty.add(result);
+		LifeNode e = emptyNode(level - 1);
+		LifeNode result = getNode(e, e, e, e);
+		empty.add(result);
 		return result;
 	}
 
@@ -66,55 +69,51 @@ public class LifeWorld {
 			return node;
 		}
 		if(!trans.containsKey(node.id)) {
-			LifeNode nw = node.children[0];
-			LifeNode ne = node.children[1];
-			LifeNode sw = node.children[2];
-			LifeNode se = node.children[3];
-			trans.put(node.id, this.getNode(
-				this.canonicalize(nw, trans),
-				this.canonicalize(ne, trans),
-				this.canonicalize(sw, trans),
-				this.canonicalize(se, trans)
+			trans.put(node.id, getNode(
+				canonicalize(node.nw, trans),
+				canonicalize(node.ne, trans),
+				canonicalize(node.sw, trans),
+				canonicalize(node.se, trans)
 			));
 		}
 		return trans.get(node.id);
 	}
 
 	public void clear() {
-		this.root = this.single[0];
-		this.collect();
+		root = single[0];
+		collect();
 	}
 
 	public void collect() {
-		this.trim();
-		this.empty.clear();
-		this.empty.add(this.single[0]);
-		this.empty.add(this.memo.get(new MemoKey(0,0,0,0)));
-		HashMap<MemoKey, LifeNode> oldMemo = this.memo;
-		this.memo = new HashMap<MemoKey, LifeNode>();
+		trim();
+		empty.clear();
+		empty.add(single[0]);
+		empty.add(memo.get(new MemoKey(0,0,0,0)));
+		HashMap<MemoKey, LifeNode> oldMemo = memo;
+		memo = new HashMap<MemoKey, LifeNode>();
 		for(int i = 0; i < 16; i++) {
 			MemoKey key = new MemoKey(i & 1, (i & 2) / 2, (i & 4) / 4, (i & 8) / 8);
-			this.memo.put(key, oldMemo.get(key));
+			memo.put(key, oldMemo.get(key));
 		}
 		HashMap<Integer, LifeNode> trans = new HashMap<Integer, LifeNode>();
-		this.root = this.canonicalize(this.root, trans);
+		root = canonicalize(root, trans);
 	}
 
 	public void trim() {
 		while(true) {
-			if(this.root.count == 0) {
-				this.root = this.single[0];
+			if(root.count == 0) {
+				root = single[0];
 			}
-			if(this.root.level <= 1) {
+			if(root.level <= 1) {
 				return;
 			}
 			boolean pyElse = true; // imitate python for...else loop
 			for(int i = 0; i < 9; i++) {
-				LifeNode sub = this.root.subQuad(i);
-				if(sub.count == this.root.count) {
-					this.originx += sub.width() / 2 * (i % 3);
-					this.originy += sub.width() / 2 * (i / 3);
-					this.root = sub;
+				LifeNode sub = root.subQuad(i);
+				if(sub.count == root.count) {
+					originx += sub.width() / 2 * (i % 3);
+					originy += sub.width() / 2 * (i / 3);
+					root = sub;
 					pyElse = false;
 					break;
 				}
@@ -126,70 +125,64 @@ public class LifeWorld {
 	}
 
 	public void dbl() {
-		if(this.root.level == 0) {
-			this.root = this.memo.get(new MemoKey(this.root.id, 0, 0, 0));
+		if(root.level == 0) {
+			root = memo.get(new MemoKey(root.id, 0, 0, 0));
 			return;
 		}
-		this.originx -= this.root.width() / 2;
-		this.originy -= this.root.width() / 2;
-		LifeNode e = this.emptyNode(this.root.level - 1);
-		LifeNode[] children = this.root.children;
-		LifeNode nw, ne, sw, se;
-		nw = children[0];
-		ne = children[1];
-		sw = children[2];
-		se = children[3];
-		this.root = this.getNode(
-			this.getNode(e, e, e, nw), this.getNode(e, e, ne, e),
-			this.getNode(e, sw, e, e), this.getNode(se, e, e, e)
+		originx -= root.width() / 2;
+		originy -= root.width() / 2;
+		LifeNode e = emptyNode(root.level - 1);
+		root = getNode(
+			getNode(e, e, e, root.nw), getNode(e, e, root.ne, e),
+			getNode(e, root.sw, e, e), getNode(root.se, e, e, e)
 		);
 	}
 
 	public int get(int x, int y) {
-		if(x < this.originx || y < this.originy || x >= this.originx + this.root.width() || y >= this.originy + this.root.width()) {
+		if(x < originx || y < originy || x >= originx + root.width() || y >= originy + root.width()) {
 			return 0;
 		}
 		else {
-			return this.root.get(x - this.originx, y - this.originy);
+			return root.get(x - originx, y - originy);
 		}
 	}
 
 	public ArrayList<Point> getAll(int[] rect) {
 		ArrayList<Point> cells = new ArrayList<Point>();
-		this.root.getList(cells, this.originx, this.originy, rect);
+		root.getList(cells, originx, originy, rect);
 		return cells;
 	}
 
 	public void set(int x, int y, int value) {
-		if(this.get(x,  y) == value) {
+		if(get(x,  y) == value) {
 			return;
 		}
-		while(x < this.originx || y < this.originy || x >= this.originx + this.root.width() || y >= this.originy + this.root.width()) {
-			this.dbl();
+		while(x < originx || y < originy || x >= originx + root.width() || y >= originy + root.width()) {
+			dbl();
 		}
-		this.root = this.root.set(x - this.originx, y - this.originy, value);
+		root = root.set(x - originx, y - originy, value);
 	}
 
 	public void step(int steps) {
 		if(steps == 0) {
 			return;
 		}
-		this.dbl();
-		this.dbl();
-		while(steps > this.root.genSteps()) {
-			steps -= this.root.genSteps();
-			this.root = this.root.nextCenter(this.root.genSteps());
-			this.originx = this.originx + this.root.width() / 2;
-			this.originy = this.originy + this.root.width() / 2;
-			this.dbl();
-			this.dbl();
+		dbl();
+		dbl();
+		while(steps > root.genSteps()) {
+			steps -= root.genSteps();
+			root = root.nextCenter(root.genSteps());
+			originx = originx + root.width() / 2;
+			originy = originy + root.width() / 2;
+			dbl();
+			dbl();
 		}
-		this.root = this.root.nextCenter(steps);
-		this.originx = this.originx + this.root.width() / 2;
-		this.originy = this.originy + this.root.width() / 2;
+		root = root.nextCenter(steps);
+		originx = originx + root.width() / 2;
+		originy = originy + root.width() / 2;
 	}
 
 	public int count() {
-		return this.root.count;
+		return root.count;
 	}
 }
