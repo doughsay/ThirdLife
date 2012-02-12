@@ -16,22 +16,22 @@ public class ThrashLife {
 		world.set(6, 2, 1);
 
 		int generation = 0;
-		int population = world.getAll(null).size();
+		int population = world.count();
 		System.out.println(generation + ": " + population);
-		for(int i = 0, j = 100; i < 18000; i += j) {
+		for(int i = 0, j = 1; i < 18000; i += j) {
 			if(world.root.width() > (Math.pow(2, 28))) {
 				world.collect();
 			}
 			world.step(j);
 			generation += j;
-			population = world.getAll(null).size();
+			population = world.count();
 			System.out.println(generation + ": " + population);
 		}
 	}
 
 	public static void printWorld(LifeWorld world) {
 		ArrayList<Point> cells = world.getAll(null);
-		System.out.println(cells.size() + " live cells:");
+		System.out.println(world.count() + " live cells:");
 		for(Point cell : cells) {
 			System.out.println("(" + cell.x + ", " + cell.y + ")");
 		}

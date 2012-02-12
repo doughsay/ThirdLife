@@ -8,40 +8,50 @@ public class LifeNode {
 	public int level;
 	public int count;
 	public int id;
-	public LifeNode[] children;
+	public LifeNode nw, ne, sw, se;
 	private LifeWorld world;
 	private HashMap<Integer, LifeNode> cache = new HashMap<Integer, LifeNode>();
 
-	public LifeNode(LifeWorld world, int id, LifeNode[] children) {
+	public LifeNode(LifeWorld world, int id, LifeNode nw, LifeNode ne, LifeNode sw, LifeNode se) {
 		if(id <= 1) {
-			this.level = 0;
-			this.count = id;
+			level = 0;
+			count = id;
 		}
 		else {
-			LifeNode nw, ne, sw, se;
-			nw = children[0];
-			ne = children[1];
-			sw = children[2];
-			se = children[3];
-			this.level = nw.level + 1;
-			this.count = nw.count + ne.count + sw.count + se.count;
+			level = nw.level + 1;
+			count = nw.count + ne.count + sw.count + se.count;
 		}
 		this.id = id;
-		this.children = children;
+		this.nw = nw;
+		this.ne = ne;
+		this.sw = sw;
+		this.se = se;
 		this.world = world;
 	}
 
+	public LifeNode(LifeWorld world, int id, LifeNode[] children) {
+		this(world, id, children[0], children[1], children[2], children[3]);
+	}
+
+	public LifeNode(LifeWorld world, int id) {
+		this(world, id, null, null, null, null);
+	}
+
+	public LifeNode[] childrenArray() {
+		return new LifeNode[] {nw, ne, sw, se};
+	}
+
 	public int get(int x, int y) {
-		if(this.level == 0) {
-			return this.count;
+		if(level == 0) {
+			return count;
 		}
-		int half = this.width() / 2;
-		LifeNode child = this.children[x / half + y / half * 2];
+		int half = width() / 2;
+		LifeNode child = childrenArray()[x / half + y / half * 2];
 		return child.get(x % half, y % half);
 	}
 
 	public void getList(ArrayList<Point> result, int x, int y, int[] rect) {
-		if(this.count == 0) {
+		if(count == 0) {
 			return;
 		}
 		if(rect != null) {
@@ -50,20 +60,15 @@ public class LifeNode {
 			miny = rect[1];
 			maxx = rect[2];
 			maxy = rect[3];
-			if(x >= maxx || x + this.width() <= minx || y >= maxy || y + this.width() <= miny) {
+			if(x >= maxx || x + width() <= minx || y >= maxy || y + width() <= miny) {
 				return;
 			}
 		}
-		if(this.level == 0) {
+		if(level == 0) {
 			result.add(new Point(x, y));
 		}
 		else {
-			int half = this.width() / 2;
-			LifeNode nw, ne, sw, se;
-			nw = this.children[0];
-			ne = this.children[1];
-			sw = this.children[2];
-			se = this.children[3];
+			int half = width() / 2;
 			nw.getList(result, x, y, rect);
 			ne.getList(result, x + half, y, rect);
 			sw.getList(result, x, y + half, rect);
@@ -72,45 +77,41 @@ public class LifeNode {
 	}
 
 	public LifeNode set(int x, int y, int value) {
-		if(this.level == 0) {
-			return this.world.single[value];
+		if(level == 0) {
+			return world.single[value];
 		}
-		int half = this.width() / 2;
+		int half = width() / 2;
 		int index = x / half + y / half * 2;
-		LifeNode[] children = {this.children[0], this.children[1], this.children[2], this.children[3]};
+		LifeNode[] children = childrenArray();
 		children[index] = children[index].set(x % half, y % half, value);
-		return this.world.getNode(children[0], children[1], children[2], children[3]);
+		return world.getNode(children);
 	}
 
 	public LifeNode nextCenter(int steps) {
 		if(steps == 0) {
-			return this.center();
+			return center();
 		}
-		if(this.cache.containsKey(steps)) {
-			return this.cache.get(steps);
+		if(cache.containsKey(steps)) {
+			return cache.get(steps);
 		}
-		LifeNode nw, ne, sw, se, result;
-		nw = this.children[0];
-		ne = this.children[1];
-		sw = this.children[2];
-		se = this.children[3];
-		if(this.level == 2) {
+		LifeNode result;
+		if(level == 2) {
 			int aa, ab, ba, bb;
 			int ac, ad, bc, bd;
 			int ca, cb, da, db;
 			int cc, cd, dc, dd;
-			aa = nw.children[0].id; ab = nw.children[1].id; ba = nw.children[2].id; bb = nw.children[3].id;
-			ac = ne.children[0].id; ad = ne.children[1].id; bc = ne.children[2].id; bd = ne.children[3].id;
-			ca = sw.children[0].id; cb = sw.children[1].id; da = sw.children[2].id; db = sw.children[3].id;
-			cc = se.children[0].id; cd = se.children[1].id; dc = se.children[2].id; dd = se.children[3].id;
+			aa = nw.nw.id; ab = nw.ne.id; ba = nw.sw.id; bb = nw.se.id;
+			ac = ne.nw.id; ad = ne.ne.id; bc = ne.sw.id; bd = ne.se.id;
+			ca = sw.nw.id; cb = sw.ne.id; da = sw.sw.id; db = sw.se.id;
+			cc = se.nw.id; cd = se.ne.id; dc = se.sw.id; dd = se.se.id;
 			int nwscore = Life.score(bb, aa + ab + ac + ba + bc + ca + cb + cc);
 			int nescore = Life.score(bc, ab + ac + ad + bb + bd + cb + cc + cd);
 			int swscore = Life.score(cb, ba + bb + bc + ca + cc + da + db + dc);
 			int sescore = Life.score(cc, bb + bc + bd + cb + cd + db + dc + dd);
-			result = this.world.memo.get(new MemoKey(nwscore, nescore, swscore, sescore));
+			result = world.memo.get(new MemoKey(nwscore, nescore, swscore, sescore));
 		}
 		else {
-			int halfsteps = this.genSteps() / 2;
+			int halfsteps = genSteps() / 2;
 			int step1;
 			if(steps <= halfsteps) {
 				step1 = 0;
@@ -119,69 +120,59 @@ public class LifeNode {
 				step1 = halfsteps;
 			}
 			int step2 = steps - step1;
-			LifeNode n00 = this.subQuad(0).nextCenter(step1);
-			LifeNode n01 = this.subQuad(1).nextCenter(step1);
-			LifeNode n02 = this.subQuad(2).nextCenter(step1);
-			LifeNode n10 = this.subQuad(3).nextCenter(step1);
-			LifeNode n11 = this.subQuad(4).nextCenter(step1);
-			LifeNode n12 = this.subQuad(5).nextCenter(step1);
-			LifeNode n20 = this.subQuad(6).nextCenter(step1);
-			LifeNode n21 = this.subQuad(7).nextCenter(step1);
-			LifeNode n22 = this.subQuad(8).nextCenter(step1);
-			result = this.world.getNode(
-				this.world.getNode(n00, n01, n10, n11).nextCenter(step2),
-				this.world.getNode(n01, n02, n11, n12).nextCenter(step2),
-				this.world.getNode(n10, n11, n20, n21).nextCenter(step2),
-				this.world.getNode(n11, n12, n21, n22).nextCenter(step2)
+			LifeNode n00 = subQuad(0).nextCenter(step1);
+			LifeNode n01 = subQuad(1).nextCenter(step1);
+			LifeNode n02 = subQuad(2).nextCenter(step1);
+			LifeNode n10 = subQuad(3).nextCenter(step1);
+			LifeNode n11 = subQuad(4).nextCenter(step1);
+			LifeNode n12 = subQuad(5).nextCenter(step1);
+			LifeNode n20 = subQuad(6).nextCenter(step1);
+			LifeNode n21 = subQuad(7).nextCenter(step1);
+			LifeNode n22 = subQuad(8).nextCenter(step1);
+			result = world.getNode(
+				world.getNode(n00, n01, n10, n11).nextCenter(step2),
+				world.getNode(n01, n02, n11, n12).nextCenter(step2),
+				world.getNode(n10, n11, n20, n21).nextCenter(step2),
+				world.getNode(n11, n12, n21, n22).nextCenter(step2)
 			);
 		}
-		this.cache.put(steps, result);
+		cache.put(steps, result);
 		return result;
 	}
 
 	public LifeNode center() {
-		if(this.cache.containsKey(0)) {
-			return this.cache.get(0);
+		if(cache.containsKey(0)) {
+			return cache.get(0);
 		}
-		LifeNode nw, ne, sw, se;
-		nw = this.children[0];
-		ne = this.children[1];
-		sw = this.children[2];
-		se = this.children[3];
-		LifeNode result = this.world.getNode(
-			nw.children[3],
-			ne.children[2],
-			sw.children[1],
-			se.children[0]
+		LifeNode result = world.getNode(
+			nw.se,
+			ne.sw,
+			sw.ne,
+			se.nw
 		);
-		this.cache.put(0, result);
+		cache.put(0, result);
 		return result;
 	}
 
 	public LifeNode subQuad(int i) {
-		LifeNode nw, ne, sw, se;
-		nw = this.children[0];
-		ne = this.children[1];
-		sw = this.children[2];
-		se = this.children[3];
 		if(i == 0) { return nw; }
-		if(i == 1) { return this.world.getNode(nw.children[1], ne.children[0], nw.children[3], ne.children[2]); }
+		if(i == 1) { return world.getNode(nw.ne, ne.nw, nw.se, ne.sw); }
 		if(i == 2) { return ne; }
-		if(i == 3) { return this.world.getNode(nw.children[2], nw.children[3], sw.children[0], sw.children[1]); }
-		if(i == 4) { return this.center(); }
-		if(i == 5) { return this.world.getNode(ne.children[2], ne.children[3], se.children[0], se.children[1]); }
+		if(i == 3) { return world.getNode(nw.sw, nw.se, sw.nw, sw.ne); }
+		if(i == 4) { return center(); }
+		if(i == 5) { return world.getNode(ne.sw, ne.se, se.nw, se.ne); }
 		if(i == 6) { return sw; }
-		if(i == 7) { return this.world.getNode(sw.children[1], se.children[0], sw.children[3], se.children[2]); }
+		if(i == 7) { return world.getNode(sw.ne, se.nw, sw.se, se.sw); }
 		if(i == 8) { return se; }
 		return null; // this should never happen, right?
 	}
 
 	public int width() {
-		return 1 << this.level;
+		return 1 << level;
 	}
 
 	public int genSteps() {
-		return 1 << (this.level - 2);
+		return 1 << (level - 2);
 	}
 
 }
