@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class LifeWorld {
 
-	private int originx, originy, originz;
+	public int originx, originy, originz;
 	public LifeNode[] single = new LifeNode[2];
 	public HashMap<MemoKey, LifeNode> memo = new HashMap<MemoKey, LifeNode>();
 	private ArrayList<LifeNode> empty = new ArrayList<LifeNode>();
