@@ -1,30 +1,35 @@
 package com.github.doughsay.thrashlife;
 
 public final class MemoKey {
-	public final int nwId, neId, swId, seId;
-	
-	public MemoKey(int nwId, int neId, int swId, int seId) {
-		this.nwId = nwId;
-		this.neId = neId;
-		this.swId = swId;
-		this.seId = seId;
+	public final int fnwId, fneId, fswId, fseId, bnwId, bneId, bswId, bseId;
+
+	public MemoKey(int fnwId, int fneId, int fswId, int fseId, int bnwId, int bneId, int bswId, int bseId) {
+		this.fnwId = fnwId;
+		this.fneId = fneId;
+		this.fswId = fswId;
+		this.fseId = fseId;
+		this.bnwId = bnwId;
+		this.bneId = bneId;
+		this.bswId = bswId;
+		this.bseId = bseId;
 	}
-	
+
 	public int[] toArray() {
-		return new int[] {nwId, neId, swId, seId};
+		return new int[] {fnwId, fneId, fswId, fseId, bnwId, bneId, bswId, bseId};
 	}
 
 	@Override
 	public String toString() {
-		return nwId+","+neId+","+swId+","+seId;
+		return fnwId+","+fneId+","+fswId+","+fseId+","+bnwId+","+bneId+","+bswId+","+bseId;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		MemoKey other = (MemoKey)obj;
-		return other.nwId == nwId && other.neId == neId && other.swId == swId && other.seId == seId;
+		return other.fnwId == fnwId && other.fneId == fneId && other.fswId == fswId && other.fseId == fseId &&
+				other.bnwId == bnwId && other.bneId == bneId && other.bswId == bswId && other.bseId == bseId;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return toString().hashCode();
