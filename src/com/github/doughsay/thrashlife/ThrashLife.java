@@ -30,13 +30,7 @@ public class ThrashLife {
 			System.exit(0);
 		}
 
-		for(int x = -100; x <= 100; x++) {
-			for(int y = 0; y <= 1; y++) {
-				for(int z = 0; z <= 1; z++) {
-					world.set(x, y, z, 1);
-				}
-			}
-		}
+		blinker();
 
 		initGL(); // init OpenGL
 		getDelta(); // call once before loop to initialise lastFrame
@@ -53,6 +47,50 @@ public class ThrashLife {
 		}
 
 		Display.destroy();
+	}
+
+	public void set(int x, int y, int z) {
+		world.set(x, y, z, 1);
+	}
+
+	public void erase(int x, int y, int z) {
+		world.set(x, y, z, 0);
+	}
+
+	public void toggle(int x, int y, int z) {
+		world.set(x, y, z, world.get(x, y, z) == 1 ? 0 : 1);
+	}
+
+	public void line() {
+		for(int x = -100; x <= 100; x++) {
+			for(int y = 0; y <= 1; y++) {
+				for(int z = 0; z <= 1; z++) {
+					set(x, y, z);
+				}
+			}
+		}
+	}
+
+	public void blinker() {
+		set(-1,0,0);
+		set(0,0,0);
+		set(1,0,0);
+		set(-1,1,0);
+		set(0,1,0);
+		set(1,1,0);
+	}
+
+	public void glider() {
+		set(0, 0, 0);
+		set(0, 1, 0);
+		set(0, 2, 0);
+		set(1, 2, 0);
+		set(2, 1, 0);
+		set(0, 0, 1);
+		set(0, 1, 1);
+		set(0, 2, 1);
+		set(1, 2, 1);
+		set(2, 1, 1);
 	}
 
 	public void step(int steps) {
