@@ -27,7 +27,11 @@ public class ThrashLife {
 	private LifeWorld world = new LifeWorld();
 
 	public void start() {
-		line(100);
+		glider(0,0,0);
+		blinker(7,7,7);
+		glider(-10,-10,-10);
+		blinker(10,-10,10);
+		blinker(-10,-10,10);
 
 		initGL(); // init OpenGL
 		getDelta(); // call once before loop to initialise lastFrame
@@ -74,26 +78,26 @@ public class ThrashLife {
 		}
 	}
 
-	public void blinker() {
-		set(-1,0,0);
-		set(0,0,0);
-		set(1,0,0);
-		set(-1,1,0);
-		set(0,1,0);
-		set(1,1,0);
+	public void blinker(int x, int y, int z) {
+		set(x-1, y,   z);
+		set(  x, y,   z);
+		set(x+1, y,   z);
+		set(x-1, y+1, z);
+		set(  x, y+1, z);
+		set(x+1, y+1, z);
 	}
 
-	public void glider() {
-		set(0, 0, 0);
-		set(0, 1, 0);
-		set(0, 2, 0);
-		set(1, 2, 0);
-		set(2, 1, 0);
-		set(0, 0, 1);
-		set(0, 1, 1);
-		set(0, 2, 1);
-		set(1, 2, 1);
-		set(2, 1, 1);
+	public void glider(int x, int y, int z) {
+		set(  x,   y,   z);
+		set(  x, y+1,   z);
+		set(  x, y+2,   z);
+		set(x+1, y+2,   z);
+		set(x+2, y+1,   z);
+		set(  x,   y, z+1);
+		set(  x, y+1, z+1);
+		set(  x, y+2, z+1);
+		set(x+1, y+2, z+1);
+		set(x+2, y+1, z+1);
 	}
 
 	public void step(int steps) {
