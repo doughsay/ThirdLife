@@ -106,54 +106,34 @@ public class LifeNode {
 		}
 		LifeNode result;
 		if(level == 2) {
-			int aaa, aba, baa, bba;
-			int aca, ada, bca, bda;
-			int caa, cba, daa, dba;
-			int cca, cda, dca, dda;
+			int aaa = fnw.fnw.id, aba = fnw.fne.id, baa = fnw.fsw.id, bba = fnw.fse.id;
+			int aca = fne.fnw.id, ada = fne.fne.id, bca = fne.fsw.id, bda = fne.fse.id;
+			int caa = fsw.fnw.id, cba = fsw.fne.id, daa = fsw.fsw.id, dba = fsw.fse.id;
+			int cca = fse.fnw.id, cda = fse.fne.id, dca = fse.fsw.id, dda = fse.fse.id;
 
-			int aab, abb, bab, bbb;
-			int acb, adb, bcb, bdb;
-			int cab, cbb, dab, dbb;
-			int ccb, cdb, dcb, ddb;
+			int aab = fnw.bnw.id, abb = fnw.bne.id, bab = fnw.bsw.id, bbb = fnw.bse.id;
+			int acb = fne.bnw.id, adb = fne.bne.id, bcb = fne.bsw.id, bdb = fne.bse.id;
+			int cab = fsw.bnw.id, cbb = fsw.bne.id, dab = fsw.bsw.id, dbb = fsw.bse.id;
+			int ccb = fse.bnw.id, cdb = fse.bne.id, dcb = fse.bsw.id, ddb = fse.bse.id;
 
-			int aac, abc, bac, bbc;
-			int acc, adc, bcc, bdc;
-			int cac, cbc, dac, dbc;
-			int ccc, cdc, dcc, ddc;
+			int aac = bnw.fnw.id, abc = bnw.fne.id, bac = bnw.fsw.id, bbc = bnw.fse.id;
+			int acc = bne.fnw.id, adc = bne.fne.id, bcc = bne.fsw.id, bdc = bne.fse.id;
+			int cac = bsw.fnw.id, cbc = bsw.fne.id, dac = bsw.fsw.id, dbc = bsw.fse.id;
+			int ccc = bse.fnw.id, cdc = bse.fne.id, dcc = bse.fsw.id, ddc = bse.fse.id;
 
-			int aad, abd, bad, bbd;
-			int acd, add, bcd, bdd;
-			int cad, cbd, dad, dbd;
-			int ccd, cdd, dcd, ddd;
+			int aad = bnw.bnw.id, abd = bnw.bne.id, bad = bnw.bsw.id, bbd = bnw.bse.id;
+			int acd = bne.bnw.id, add = bne.bne.id, bcd = bne.bsw.id, bdd = bne.bse.id;
+			int cad = bsw.bnw.id, cbd = bsw.bne.id, dad = bsw.bsw.id, dbd = bsw.bse.id;
+			int ccd = bse.bnw.id, cdd = bse.bne.id, dcd = bse.bsw.id, ddd = bse.bse.id;
 
-			aaa = fnw.fnw.id; aba = fnw.fne.id; baa = fnw.fsw.id; bba = fnw.fse.id;
-			aca = fne.fnw.id; ada = fne.fne.id; bca = fne.fsw.id; bda = fne.fse.id;
-			caa = fsw.fnw.id; cba = fsw.fne.id; daa = fsw.fsw.id; dba = fsw.fse.id;
-			cca = fse.fnw.id; cda = fse.fne.id; dca = fse.fsw.id; dda = fse.fse.id;
-
-			aab = fnw.bnw.id; abb = fnw.bne.id; bab = fnw.bsw.id; bbb = fnw.bse.id;
-			acb = fne.bnw.id; adb = fne.bne.id; bcb = fne.bsw.id; bdb = fne.bse.id;
-			cab = fsw.bnw.id; cbb = fsw.bne.id; dab = fsw.bsw.id; dbb = fsw.bse.id;
-			ccb = fse.bnw.id; cdb = fse.bne.id; dcb = fse.bsw.id; ddb = fse.bse.id;
-
-			aac = bnw.fnw.id; abc = bnw.fne.id; bac = bnw.fsw.id; bbc = bnw.fse.id;
-			acc = bne.fnw.id; adc = bne.fne.id; bcc = bne.fsw.id; bdc = bne.fse.id;
-			cac = bsw.fnw.id; cbc = bsw.fne.id; dac = bsw.fsw.id; dbc = bsw.fse.id;
-			ccc = bse.fnw.id; cdc = bse.fne.id; dcc = bse.fsw.id; ddc = bse.fse.id;
-
-			aad = bnw.bnw.id; abd = bnw.bne.id; bad = bnw.bsw.id; bbd = bnw.bse.id;
-			acd = bne.bnw.id; add = bne.bne.id; bcd = bne.bsw.id; bdd = bne.bse.id;
-			cad = bsw.bnw.id; cbd = bsw.bne.id; dad = bsw.bsw.id; dbd = bsw.bse.id;
-			ccd = bse.bnw.id; cdd = bse.bne.id; dcd = bse.bsw.id; ddd = bse.bse.id;
-
-			int fnwscore = Life.score(bbb, aaa + aba + aca + baa + bba+  bca + caa + cba + cca + aab + abb + acb + bab + bcb + cab + cbb + ccb + aac + abc + acc + bac + bbc + bcc + cac + cbc + ccc);
+			int fnwscore = Life.score(bbb, aaa + aba + aca + baa + bba + bca + caa + cba + cca + aab + abb + acb + bab + bcb + cab + cbb + ccb + aac + abc + acc + bac + bbc + bcc + cac + cbc + ccc);
 			int fnescore = Life.score(bcb, aba + aca + ada + bba + bca + bda + cba + cca + cda + abb + acb + adb + bbb + bdb + cbb + ccb + cdb + abc + acc + adc + bbc + bcc + bdc + cbc + ccc + cdc);
 			int fswscore = Life.score(cbb, baa + bba + bca + caa + cba + cca + daa + dba + dca + bab + bbb + bcb + cab + ccb + dab + dbb + dcb + bac + bbc + bcc + cac + cbc + ccc + dac + dbc + dcc);
 			int fsescore = Life.score(ccb, bba + bca + bda + cba + cca + cda + dba + dca + dda + bbb + bcb + bdb + cbb + cdb + dbb + dcb + ddb + bbc + bcc + bdc + cbc + ccc + cdc + dbc + dcc + ddc);
 
 			int bnwscore = Life.score(bbc, aab + abb + acb + bab + bbb + bcb + cab + cbb + ccb + aac + abc + acc + bac + bcc + cac + cbc + ccc + aad + abd + acd + bad + bbd + bcd + cad + cbd + ccd);
 			int bnescore = Life.score(bcc, abb + acb + adb + bbb + bcb + bdb + cbb + ccb + cdb + abc + acc + adc + bbc + bdc + cbc + ccc + cdc + abd + acd + add + bbd + bcd + bdd + cbd + ccd + cdd);
-			int bswscore = Life.score(cbc, bab + bbb + bcb + cab + cbb + ccb + dab + dbb + dcb + bac + bbc + bcc + cac + ccc + dac + dbc + dcc + bad + bbd + bcd + cad + cdb + ccd + dad + dbd + dcd);
+			int bswscore = Life.score(cbc, bab + bbb + bcb + cab + cbb + ccb + dab + dbb + dcb + bac + bbc + bcc + cac + ccc + dac + dbc + dcc + bad + bbd + bcd + cad + cbd + ccd + dad + dbd + dcd);
 			int bsescore = Life.score(ccc, bbb + bcb + bdb + cbb + ccb + cdb + dbb + dcb + ddb + bbc + bcc + bdc + cbc + cdc + dbc + dcc + ddc + bbd + bcd + bdd + cbd + ccd + cdd + dbd + dcd + ddd);
 
 			result = world.memo.get(new MemoKey(fnwscore, fnescore, fswscore, fsescore, bnwscore, bnescore, bswscore, bsescore));
