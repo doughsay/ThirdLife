@@ -27,7 +27,7 @@ public class ThrashLife {
 	private LifeWorld world = new LifeWorld();
 
 	public void start() {
-		blinker();
+		line(100);
 
 		initGL(); // init OpenGL
 		getDelta(); // call once before loop to initialise lastFrame
@@ -63,8 +63,9 @@ public class ThrashLife {
 		world.set(x, y, z, world.get(x, y, z) == 1 ? 0 : 1);
 	}
 
-	public void line() {
-		for(int x = -100; x <= 100; x++) {
+	public void line(int width) {
+		int half = width / 2;
+		for(int x = -half; x <= half; x++) {
 			for(int y = 0; y <= 1; y++) {
 				for(int z = 0; z <= 1; z++) {
 					set(x, y, z);
@@ -97,11 +98,12 @@ public class ThrashLife {
 
 	public void step(int steps) {
 		if(world.root.width() > Math.pow(2, 14)) {
-			System.out.println("Collecting...");
 			world.collect();
-			System.out.println("new origin: {" + world.originx + "," + world.originy + "," + world.originz + "}");
 		}
 		world.step(steps);
+		System.out.println("root level: " + world.root.level);
+		System.out.println("root width: " + world.root.width());
+		System.out.println("origin: " + world.originx + "," + world.originy + "," + world.originz);
 	}
 
 	public void initGL() {

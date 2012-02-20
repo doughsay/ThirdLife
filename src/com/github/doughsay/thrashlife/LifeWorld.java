@@ -117,8 +117,8 @@ public class LifeWorld {
 				LifeNode sub = root.subQuad(i);
 				if(sub.count == root.count) {
 					originx += sub.width() / 2 * (i % 3);
-					originy += sub.width() / 2 * (i % 3);
-					originz += sub.width() / 2 * (i % 3);
+					originy += sub.width() / 2 * ((i / 3) % 3);
+					originz += sub.width() / 2 * (i / 9);
 					root = sub;
 					pyElse = false;
 					break;
@@ -178,7 +178,7 @@ public class LifeWorld {
 		}
 		dbl();
 		dbl();
-		while(steps > root.genSteps()) {
+		/*while(steps > root.genSteps()) {
 			steps -= root.genSteps();
 			root = root.nextCenter(root.genSteps());
 			originx = originx + root.width() / 2;
@@ -186,7 +186,7 @@ public class LifeWorld {
 			originz = originz + root.width() / 2;
 			dbl();
 			dbl();
-		}
+		}*/
 		root = root.nextCenter(steps);
 		originx = originx + root.width() / 2;
 		originy = originy + root.width() / 2;
