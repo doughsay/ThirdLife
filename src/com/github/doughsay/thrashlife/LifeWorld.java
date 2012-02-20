@@ -117,8 +117,8 @@ public class LifeWorld {
 				LifeNode sub = root.subQuad(i);
 				if(sub.count == root.count) {
 					originx += sub.width() / 2 * (i % 3);
-					originy += sub.width() / 2 * (i / 3);
-					originz += sub.width() / 2 * (i / 3);
+					originy += sub.width() / 2 * (i % 3);
+					originz += sub.width() / 2 * (i % 3);
 					root = sub;
 					pyElse = false;
 					break;

@@ -19,17 +19,14 @@ public class ThrashLife {
 	private int cameraY = 0;
 	private int cameraDist = 10;
 
+	private int screenX = 800;
+	private int screenY = 600;
+
+	private boolean playing = false;
+
 	private LifeWorld world = new LifeWorld();
 
 	public void start() {
-		try {
-			Display.setDisplayMode(new DisplayMode(800, 600));
-			Display.create();
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-
 		blinker();
 
 		initGL(); // init OpenGL
@@ -40,6 +37,11 @@ public class ThrashLife {
 			int delta = getDelta();
 
 			update(delta);
+
+			if(playing) {
+				step(1);
+			}
+
 			renderGL();
 
 			Display.update();
@@ -94,7 +96,7 @@ public class ThrashLife {
 	}
 
 	public void step(int steps) {
-		if(world.root.width() > Math.pow(2, 28)) {
+		if(world.root.width() > Math.pow(2, 14)) {
 			System.out.println("Collecting...");
 			world.collect();
 			System.out.println("new origin: {" + world.originx + "," + world.originy + "," + world.originz + "}");
@@ -103,11 +105,16 @@ public class ThrashLife {
 	}
 
 	public void initGL() {
-		DisplayMode DM = Display.getDisplayMode();
-		int width = DM.getWidth();
-		int height = DM.getHeight();
-		float aspectRatio = (float)width / (float)height;
-		GL11.glViewport(0, 0, width, height);
+		try {
+			Display.setDisplayMode(new DisplayMode(screenX, screenY));
+			Display.create();
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+
+		float aspectRatio = (float)screenX / (float)screenY;
+		GL11.glViewport(0, 0, screenX, screenY);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		GLU.gluPerspective(45f, aspectRatio, 1f, 1000f);
@@ -141,6 +148,14 @@ public class ThrashLife {
 			if (Keyboard.getEventKeyState()) {
 				if (Keyboard.getEventKey() == Keyboard.KEY_SPACE) {
 					step(1);
+				}
+
+				if (Keyboard.getEventKey() == Keyboard.KEY_S) {
+					playing = true;
+				}
+
+				if (Keyboard.getEventKey() == Keyboard.KEY_P) {
+					playing = false;
 				}
 			}
 		}
@@ -176,7 +191,7 @@ public class ThrashLife {
 	 */
 	public void updateFPS() {
 		if (getTime() - lastFPS > 1000) {
-			Display.setTitle("FPS: " + fps);
+			Display.setTitle("FPS: " + fps + " - Population: " + world.count());
 			fps = 0;
 			lastFPS += 1000;
 		}
