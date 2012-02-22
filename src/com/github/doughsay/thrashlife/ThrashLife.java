@@ -1,6 +1,7 @@
 package com.github.doughsay.thrashlife;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
@@ -29,7 +30,7 @@ public class ThrashLife {
 	private LifeWorld world = new LifeWorld();
 
 	public void start() {
-		line(100);
+		randomFill(50, 25, 0, 0, 0);
 
 		initGL(); // init OpenGL
 		getDelta(); // call once before loop to initialise lastFrame
@@ -67,12 +68,26 @@ public class ThrashLife {
 		world.set(x, y, z, world.get(x, y, z) == 1 ? 0 : 1);
 	}
 
-	public void line(int width) {
+	public void line(int width, int ox, int oy, int oz) {
 		int half = width / 2;
 		for(int x = -half; x <= half; x++) {
 			for(int y = 0; y <= 1; y++) {
 				for(int z = 0; z <= 1; z++) {
-					set(x, y, z);
+					set(ox+x, oy+y, oz+z);
+				}
+			}
+		}
+	}
+
+	public void randomFill(int width, int fillPercent, int ox, int oy, int oz) {
+		Random randomGenerator = new Random();
+		int half = width / 2;
+		for(int x = -half; x <= half; x++) {
+			for(int y = -half; y <= half; y++) {
+				for(int z = -half; z <= half; z++) {
+					if(randomGenerator.nextInt(100) < fillPercent) {
+						set(ox+x, oy+y, oz+z);
+					}
 				}
 			}
 		}
