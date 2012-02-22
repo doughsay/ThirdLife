@@ -30,7 +30,7 @@ public class ThrashLife {
 	private LifeWorld world = new LifeWorld();
 
 	public void start() {
-		randomFill(50, 25, 0, 0, 0);
+		line(10, 0, 0, 0);
 
 		initGL(); // init OpenGL
 		getDelta(); // call once before loop to initialise lastFrame

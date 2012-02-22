@@ -48,6 +48,9 @@ public class FastCube {
 		};
 
 		size = 24 * cells.size();
+		if(size == 0) {
+			return;
+		}
 
 		FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(size);
 		FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(size);
@@ -94,7 +97,9 @@ public class FastCube {
 	}
 
 	public static void draw() {
-		GL11.glDrawElements(GL11.GL_QUADS, size, GL11.GL_UNSIGNED_INT, 0);
+		if(size > 0) {
+			GL11.glDrawElements(GL11.GL_QUADS, size, GL11.GL_UNSIGNED_INT, 0);
+		}
 	}
 }
 
