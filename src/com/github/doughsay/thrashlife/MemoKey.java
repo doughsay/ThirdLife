@@ -19,11 +19,6 @@ public final class MemoKey {
 	}
 
 	@Override
-	public String toString() {
-		return fnwId+","+fneId+","+fswId+","+fseId+","+bnwId+","+bneId+","+bswId+","+bseId;
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		MemoKey other = (MemoKey)obj;
 		return other.fnwId == fnwId && other.fneId == fneId && other.fswId == fswId && other.fseId == fseId &&
@@ -32,6 +27,14 @@ public final class MemoKey {
 
 	@Override
 	public int hashCode() {
-		return toString().hashCode();
+		return
+			fnwId +
+			11 * fneId +
+			53 * fswId +
+			101 * fseId +
+			503 * bnwId +
+			1009 * bneId +
+			5003 * bswId +
+			10007 * bseId;
 	}
 }
