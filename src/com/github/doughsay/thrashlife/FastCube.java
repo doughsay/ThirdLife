@@ -10,51 +10,66 @@ import org.lwjgl.opengl.GL11;
 
 public class FastCube {
 
-	private static int size;
+	private static int size = 0;
+
+	private static final float[] baseVertices = new float[] {
+		-0.45f, -0.45f, -0.45f, // 0
+		 0.45f, -0.45f, -0.45f, // 1
+		-0.45f, -0.45f,  0.45f, // 2
+		 0.45f, -0.45f,  0.45f, // 3
+		-0.45f,  0.45f, -0.45f, // 4
+		 0.45f,  0.45f, -0.45f, // 5
+		-0.45f,  0.45f,  0.45f, // 6
+		 0.45f,  0.45f,  0.45f  // 7
+	};
+	private static float[] vertices = new float[24];
+
+	private static final int[] baseIndices = new int[] {
+		4, 5, 1, 0,
+		5, 7, 3, 1,
+		7, 6, 2, 3,
+		6, 4, 0, 2,
+		0, 1, 3, 2,
+		6, 7, 5, 4
+	};
+	private static int[] indices = new int[24];
+
+	private static final float[] colors = new float[] {
+		0.6f, 0.6f, 0.6f,
+		1.0f, 1.0f, 1.0f,
+		0.5f, 0.5f, 0.5f,
+		0.8f, 0.8f, 0.8f,
+		0.4f, 0.4f, 0.4f,
+		0.6f, 0.6f, 0.6f,
+		0.5f, 0.5f, 0.5f,
+		0.2f, 0.2f, 0.2f
+	};
+
+	private static FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(size);
+	private static FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(size);
+	private static IntBuffer indexBuffer = BufferUtils.createIntBuffer(size);
+
+	private static final int vertexBufferID = ARBVertexBufferObject.glGenBuffersARB();
+	private static final int colorBufferID  = ARBVertexBufferObject.glGenBuffersARB();
+	private static final int indexBufferID  = ARBVertexBufferObject.glGenBuffersARB();
 
 	public static void load(ArrayList<Point> cells) {
-
-		float[] baseVertices = new float[] {
-			-0.45f, -0.45f, -0.45f, // 0
-			 0.45f, -0.45f, -0.45f, // 1
-			-0.45f, -0.45f,  0.45f, // 2
-			 0.45f, -0.45f,  0.45f, // 3
-			-0.45f,  0.45f, -0.45f, // 4
-			 0.45f,  0.45f, -0.45f, // 5
-			-0.45f,  0.45f,  0.45f, // 6
-			 0.45f,  0.45f,  0.45f  // 7
-		};
-		float[] vertices = new float[24];
-
-		int[] baseIndices = new int[] {
-			4, 5, 1, 0,
-			5, 7, 3, 1,
-			7, 6, 2, 3,
-			6, 4, 0, 2,
-			0, 1, 3, 2,
-			6, 7, 5, 4
-		};
-		int[] indices = new int[24];
-
-		float[] colors = new float[] {
-			0.6f, 0.6f, 0.6f,
-			1.0f, 1.0f, 1.0f,
-			0.5f, 0.5f, 0.5f,
-			0.8f, 0.8f, 0.8f,
-			0.4f, 0.4f, 0.4f,
-			0.6f, 0.6f, 0.6f,
-			0.5f, 0.5f, 0.5f,
-			0.2f, 0.2f, 0.2f
-		};
 
 		size = 24 * cells.size();
 		if(size == 0) {
 			return;
 		}
 
-		FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(size);
-		FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(size);
-		IntBuffer indexBuffer = BufferUtils.createIntBuffer(size);
+		if(vertexBuffer.capacity() > size) {
+			vertexBuffer.clear();
+			colorBuffer.clear();
+			indexBuffer.clear();
+		}
+		else {
+			vertexBuffer = BufferUtils.createFloatBuffer(size);
+			colorBuffer = BufferUtils.createFloatBuffer(size);
+			indexBuffer = BufferUtils.createIntBuffer(size);
+		}
 
 		int i = 0;
 		for(Point cell : cells) {
@@ -80,10 +95,10 @@ public class FastCube {
 		colorBuffer.rewind();
 		indexBuffer.rewind();
 
-		int vertexBufferID = ARBVertexBufferObject.glGenBuffersARB();
-		int colorBufferID  = ARBVertexBufferObject.glGenBuffersARB();
-		int indexBufferID  = ARBVertexBufferObject.glGenBuffersARB();
+		bindBuffers();
+	}
 
+	public static void bindBuffers() {
 		ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, vertexBufferID);
 		ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, vertexBuffer, ARBVertexBufferObject.GL_STATIC_DRAW_ARB);
 		GL11.glVertexPointer(3, GL11.GL_FLOAT, 0, 0);
