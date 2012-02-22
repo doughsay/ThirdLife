@@ -1,5 +1,7 @@
 package com.github.doughsay.thrashlife;
 
+import java.util.ArrayList;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.Display;
@@ -27,15 +29,13 @@ public class ThrashLife {
 	private LifeWorld world = new LifeWorld();
 
 	public void start() {
-		glider(0,0,0);
-		blinker(7,7,7);
-		glider(-10,-10,-10);
-		blinker(10,-10,10);
-		blinker(-10,-10,10);
+		line(100);
 
 		initGL(); // init OpenGL
 		getDelta(); // call once before loop to initialise lastFrame
 		lastFPS = getTime(); // call before loop to initialise fps timer
+
+		FastCube.load(world.getAll());
 
 		while (!Display.isCloseRequested()) {
 			int delta = getDelta();
@@ -105,9 +105,7 @@ public class ThrashLife {
 			world.collect();
 		}
 		world.step(steps);
-		System.out.println("root level: " + world.root.level);
-		System.out.println("root width: " + world.root.width());
-		System.out.println("origin: " + world.originx + "," + world.originy + "," + world.originz);
+		FastCube.load(world.getAll());
 	}
 
 	public void initGL() {
@@ -134,6 +132,9 @@ public class ThrashLife {
 
 		GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glCullFace(GL11.GL_BACK);
+
+		GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+		GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
 	}
 
 	public void update(int delta) {
@@ -214,9 +215,7 @@ public class ThrashLife {
 		GL11.glRotatef(cameraY, 1f, 0f, 0f);
 		GL11.glRotatef(cameraX, 0f, 1f, 0f);
 
-		for(Point cell : world.getAll()) {
-			Cube.wireCubeAt(0.9f, cell.x, cell.y, cell.z);
-		}
+		FastCube.draw();
 	}
 
 	public static void main(String[] argv) {
