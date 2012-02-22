@@ -11,6 +11,7 @@ public class LifeWorld {
 	private ArrayList<LifeNode> empty = new ArrayList<LifeNode>();
 	private int nextId;
 	public LifeNode root;
+	public int generation = 0;
 
 	public LifeWorld() {
 		LifeNode E, X;
@@ -87,6 +88,7 @@ public class LifeWorld {
 	public void clear() {
 		root = single[0];
 		collect();
+		generation = 0;
 	}
 
 	public void collect() {
@@ -191,6 +193,8 @@ public class LifeWorld {
 		originx = originx + root.width() / 2;
 		originy = originy + root.width() / 2;
 		originz = originz + root.width() / 2;
+
+		generation += steps;
 	}
 
 	public int count() {

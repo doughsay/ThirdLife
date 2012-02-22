@@ -172,6 +172,15 @@ public class ThrashLife {
 					step(1);
 				}
 
+				if (Keyboard.getEventKey() == Keyboard.KEY_D) {
+					if(world.generation == 0) {
+						step(1);
+					}
+					else {
+						step(world.generation * 2);
+					}
+				}
+
 				if (Keyboard.getEventKey() == Keyboard.KEY_S) {
 					playing = true;
 				}
@@ -213,7 +222,7 @@ public class ThrashLife {
 	 */
 	public void updateFPS() {
 		if (getTime() - lastFPS > 1000) {
-			Display.setTitle("FPS: " + fps + " - Population: " + world.count());
+			Display.setTitle("FPS: " + fps + " - Generation: " + world.generation + " - Population: " + world.count());
 			fps = 0;
 			lastFPS += 1000;
 		}
