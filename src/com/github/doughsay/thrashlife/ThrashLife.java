@@ -240,7 +240,7 @@ public class ThrashLife {
 
 		// Draw the grid if needed
 		if(drawing || selecting) {
-			grid.draw(camera.axis, camera.planeSize, camera.lookAt);
+			grid.draw(camera);
 		}
 	}
 
