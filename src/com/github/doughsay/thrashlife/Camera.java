@@ -24,10 +24,33 @@ public class Camera {
 
 		if(yRotation > 90) { yRotation = 90; }
 		if(yRotation < -90) { yRotation = -90; }
+
+		if(yRotation > 45) {
+			axis = 4;
+		}
+		else if(yRotation < -45) {
+			axis = 5;
+		}
+		else if(xRotation > 315 || xRotation < 45) {
+			axis = 0;
+		}
+		else if(xRotation > 45 && xRotation < 135) {
+			axis = 1;
+		}
+		else if(xRotation > 135 && xRotation < 225) {
+			axis = 2;
+		}
+		else if(xRotation > 225 && xRotation < 315) {
+			axis = 3;
+		}
 	}
 
 	public void zoom(int dw) {
 		distance -= (dw / 120);
+		if(distance < 5) { distance = 5; }
+		planeSize = distance - 20;
+		if(planeSize < 10) { planeSize = 10; }
+		if(planeSize > 100) { planeSize = 100; }
 	}
 
 	public void position() {

@@ -17,7 +17,7 @@ public class ThrashLife {
 	private long lastFPS;
 	private int fps;
 
-	private boolean drawing = false, selecting = false;
+	private boolean drawing = true, selecting = false;
 
 	private Camera camera = new Camera();
 	private FastCubes cubes;
