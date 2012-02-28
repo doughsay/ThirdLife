@@ -20,6 +20,7 @@ public class ThrashLife {
 	private boolean drawing = false, selecting = false;
 
 	private Camera camera = new Camera();
+	private FastCubes cubes;
 
 	private int screenX = 800;
 	private int screenY = 600;
@@ -32,10 +33,11 @@ public class ThrashLife {
 		line(200, 0, 0, 0);
 
 		initGL(); // init OpenGL
+		cubes = new FastCubes(); // GL has to init before we can init the FastCubes class
+		cubes.load(world.getAll()); // load the current world state as geometry
+
 		getDelta(); // call once before loop to initialise lastFrame
 		lastFPS = getTime(); // call before loop to initialise fps timer
-
-		FastCube.load(world.getAll());
 
 		while (!Display.isCloseRequested()) {
 			int delta = getDelta();
@@ -119,7 +121,7 @@ public class ThrashLife {
 			world.collect();
 		}
 		world.step(steps);
-		FastCube.load(world.getAll());
+		cubes.load(world.getAll());
 	}
 
 	public void initGL() {
@@ -146,9 +148,6 @@ public class ThrashLife {
 
 		GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glCullFace(GL11.GL_BACK);
-
-		GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-		GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
 	}
 
 	public void update(int delta) {
@@ -231,7 +230,7 @@ public class ThrashLife {
 		camera.position();
 
 		// Draw the cubes
-		FastCube.draw();
+		cubes.draw();
 
 		// Draw the grid if needed
 		if(drawing || selecting) {
