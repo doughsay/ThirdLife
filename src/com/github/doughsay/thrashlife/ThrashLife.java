@@ -1,6 +1,5 @@
 package com.github.doughsay.thrashlife;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import org.lwjgl.LWJGLException;
@@ -18,9 +17,9 @@ public class ThrashLife {
 	private long lastFPS;
 	private int fps;
 
-	private int cameraX = 0;
-	private int cameraY = 0;
-	private int cameraDist = 10;
+	private boolean drawing = false, selecting = false;
+
+	private Camera camera = new Camera();
 
 	private int screenX = 800;
 	private int screenY = 600;
@@ -154,17 +153,10 @@ public class ThrashLife {
 
 	public void update(int delta) {
 		if(Mouse.isButtonDown(1)) {
-			cameraX += Mouse.getDX();
-			cameraY -= Mouse.getDY();
-
-			if(cameraX > 360) { cameraX -= 360; }
-			if(cameraX < 0) { cameraX += 360; }
-
-			if(cameraY > 90) { cameraY = 90; }
-			if(cameraY < -90) { cameraY = -90; }
+			camera.rotate(Mouse.getDX(), Mouse.getDY());
 		}
 
-		cameraDist -= (Mouse.getDWheel() / 120);
+		camera.zoom(Mouse.getDWheel());
 
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
@@ -230,16 +222,21 @@ public class ThrashLife {
 	}
 
 	public void renderGL() {
-		// Clear the screen and depth buffer
+
+		// Clear the screen / depth buffers and load identity modelview matrix
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-
 		GL11.glLoadIdentity();
-		GL11.glTranslatef(0f, 0f, -cameraDist);
 
-		GL11.glRotatef(cameraY, 1f, 0f, 0f);
-		GL11.glRotatef(cameraX, 0f, 1f, 0f);
+		// Position the camera
+		camera.position();
 
+		// Draw the cubes
 		FastCube.draw();
+
+		// Draw the grid if needed
+		if(drawing || selecting) {
+			Grid.draw(camera.axis);
+		}
 	}
 
 	public static void main(String[] argv) {
