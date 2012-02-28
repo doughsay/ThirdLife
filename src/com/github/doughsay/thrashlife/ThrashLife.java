@@ -21,6 +21,7 @@ public class ThrashLife {
 
 	private Camera camera = new Camera();
 	private FastCubes cubes;
+	private Grid grid = new Grid();
 
 	private int screenX = 800;
 	private int screenY = 600;
@@ -234,7 +235,7 @@ public class ThrashLife {
 
 		// Draw the grid if needed
 		if(drawing || selecting) {
-			Grid.draw(camera.axis);
+			grid.draw(camera.axis, camera.planeSize);
 		}
 	}
 

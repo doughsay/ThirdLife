@@ -1,7 +1,11 @@
 package com.github.doughsay.thrashlife;
 
 public class Grid {
-	public static void draw(int axis) {
+	public Grid() {
+		// TODO
+	}
+
+	public void draw(int axis, int size) {
 		// TODO
 	}
 }
