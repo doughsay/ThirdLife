@@ -149,6 +149,11 @@ public class ThrashLife {
 
 		GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glCullFace(GL11.GL_BACK);
+
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+		GL11.glLineWidth(2.0f);
+		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 	}
 
 	public void update(int delta) {
@@ -235,7 +240,7 @@ public class ThrashLife {
 
 		// Draw the grid if needed
 		if(drawing || selecting) {
-			grid.draw(camera.axis, camera.planeSize);
+			grid.draw(camera.axis, camera.planeSize, camera.lookAt);
 		}
 	}
 

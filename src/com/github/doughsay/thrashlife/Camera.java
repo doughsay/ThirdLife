@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 public class Camera {
 	private int xRotation, yRotation, distance;
 	public int axis, planeSize;
-	private Point lookAt;
+	public Point lookAt;
 
 	public Camera() {
 		xRotation = yRotation = 0;
