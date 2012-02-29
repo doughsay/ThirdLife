@@ -3,12 +3,12 @@ package com.github.doughsay.thrashlife;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class LifeNode {
+public final class LifeNode {
 
-	public int level;
-	public int count;
-	public int id;
-	public LifeNode fnw, fne, fsw, fse, bnw, bne, bsw, bse;
+	public final int level;
+	public final int count;
+	public final int id;
+	public final LifeNode fnw, fne, fsw, fse, bnw, bne, bsw, bse;
 	private LifeWorld world;
 	private HashMap<Integer, LifeNode> cache = new HashMap<Integer, LifeNode>();
 
