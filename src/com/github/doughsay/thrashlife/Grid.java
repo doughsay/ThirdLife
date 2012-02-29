@@ -1,17 +1,24 @@
 package com.github.doughsay.thrashlife;
 
+import java.nio.IntBuffer;
+
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 
 public class Grid {
 
 	private static final int MIN_SIZE = 10;
 	private static final int MAX_SIZE = 200;
+	private final Camera camera;
 
-	public Grid() { }
+	public Grid(Camera camera) {
+		this.camera = camera;
+	}
 
-	public void draw(Camera camera) {
-		Plane plane = plane(camera);
-		int size = gridSize(camera.getDistance());
+	public void draw() {
+		Plane plane = plane();
+		int size = gridSize();
 		Point origin = camera.getOrigin();
 
 		GL11.glEnable(GL11.GL_BLEND);
@@ -94,7 +101,67 @@ public class Grid {
 		GL11.glEnable(GL11.GL_CULL_FACE);
 	}
 
-	private Plane plane(Camera camera) {
+	public Point pick(int x, int y) {
+		IntBuffer selBuf = BufferUtils.createIntBuffer(512);
+		IntBuffer viewport = BufferUtils.createIntBuffer(16);
+
+		GL11.glSelectBuffer(selBuf);
+		GL11.glRenderMode(GL11.GL_SELECT);
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glPushMatrix();
+		GL11.glLoadIdentity();
+
+		GL11.glGetInteger(GL11.GL_VIEWPORT, viewport);
+		GLU.gluPickMatrix(x, viewport.get(3) - y, 5, 5, viewport);
+		GLU.gluPerspective(45f, (float) viewport.get(2) / (float) viewport.get(3), 1.0f, 1000f);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glInitNames();
+
+		draw();
+
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glPopMatrix();
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glFlush();
+
+		int hits = GL11.glRenderMode(GL11.GL_RENDER);
+
+		if(hits != 0) {
+			int index = 0;
+			for(int i = 0; i < hits; i++) {
+				int numNames = selBuf.get(index);
+				if(numNames == 2) {
+
+					int px, py, pz;
+					Plane plane = plane();
+					Point origin = camera.getOrigin();
+
+					switch(plane) {
+						case XY:
+							px = origin.x + selBuf.get(index + 3);
+							py = origin.y + selBuf.get(index + 4);
+							pz = origin.z;
+							return new Point(px, py, pz);
+						case YZ:
+							px = origin.x;
+							py = origin.y + selBuf.get(index + 3);
+							pz = origin.z + selBuf.get(index + 4);
+							return new Point(px, py, pz);
+						case XZ:
+							px = origin.x + selBuf.get(index + 3);
+							py = origin.y;
+							pz = origin.z + selBuf.get(index + 4);
+							return new Point(px, py, pz);
+					}
+
+				}
+				index += (3 + numNames);
+			}
+		}
+		return null;
+	}
+
+	private Plane plane() {
 		int xRotation = camera.getXRotation();
 		int yRotation = camera.getYRotation();
 		Plane plane = Plane.XY;
@@ -121,8 +188,8 @@ public class Grid {
 		return plane;
 	}
 
-	private int gridSize(int distance) {
-		int gridSize = distance - 20;
+	private int gridSize() {
+		int gridSize = camera.getDistance() - 20;
 		if(gridSize < MIN_SIZE) { gridSize = MIN_SIZE; }
 		if(gridSize > MAX_SIZE) { gridSize = MAX_SIZE; }
 		return gridSize;

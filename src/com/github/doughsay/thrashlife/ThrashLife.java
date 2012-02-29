@@ -1,9 +1,7 @@
 package com.github.doughsay.thrashlife;
 
-import java.nio.IntBuffer;
 import java.util.Random;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.Display;
@@ -23,7 +21,7 @@ public class ThrashLife {
 
 	private Camera camera = new Camera();
 	private FastCubes cubes;
-	private Grid grid = new Grid();
+	private Grid grid = new Grid(camera);
 
 	private int screenX = 800;
 	private int screenY = 600;
@@ -160,9 +158,10 @@ public class ThrashLife {
 
 	public void update(int delta) {
 		if(Mouse.isButtonDown(0)) {
-			Point2D point = pick(Mouse.getX(), Mouse.getY());
+			Point point = grid.pick(Mouse.getX(), Mouse.getY());
 			if(point != null) {
-				// TODO determine 3d point and draw
+				world.set(point.x, point.y, point.z, 1);
+				cubes.load(world.getAll());
 			}
 		}
 
@@ -198,47 +197,6 @@ public class ThrashLife {
 		}
 
 		updateFPS(); // update FPS Counter
-	}
-
-	private Point2D pick(int x, int y) {
-		IntBuffer selBuf = BufferUtils.createIntBuffer(512);
-		IntBuffer viewport = BufferUtils.createIntBuffer(16);
-
-		GL11.glSelectBuffer(selBuf);
-		GL11.glRenderMode(GL11.GL_SELECT);
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glPushMatrix();
-		GL11.glLoadIdentity();
-
-		GL11.glGetInteger(GL11.GL_VIEWPORT, viewport);
-		GLU.gluPickMatrix(x, viewport.get(3) - y, 5, 5, viewport);
-		GLU.gluPerspective(45f, (float) viewport.get(2) / (float) viewport.get(3), 1.0f, 1000f);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glInitNames();
-
-		grid.draw(camera);
-
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glPopMatrix();
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glFlush();
-
-		int hits = GL11.glRenderMode(GL11.GL_RENDER);
-
-		if(hits != 0) {
-			int index = 0;
-			for(int i = 0; i < hits; i++) {
-				int numNames = selBuf.get(index);
-				if(numNames == 2) {
-					int px = selBuf.get(index + 3);
-					int py = selBuf.get(index + 4);
-					return new Point2D(px, py);
-				}
-				index += (3 + numNames);
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -290,7 +248,7 @@ public class ThrashLife {
 
 		// Draw the grid if needed
 		if(drawing || selecting) {
-			grid.draw(camera);
+			grid.draw();
 		}
 	}
 
