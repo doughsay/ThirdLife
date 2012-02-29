@@ -31,11 +31,11 @@ public class Grid {
 		}
 
 		for(int i = -size / 2; i <= size / 2 + 1; i++) {
-			//glPushName(i);
+			GL11.glPushName(i);
 
 			if(i <= size / 2) {
 				for(int j = -size / 2; j <= size / 2; j++) {
-					//glPushName(j);
+					GL11.glPushName(j);
 					GL11.glColor4f(red, green, blue, 0.5f);
 					GL11.glBegin(GL11.GL_QUADS);
 					switch(plane) {
@@ -59,11 +59,11 @@ public class Grid {
 							break;
 					}
 					GL11.glEnd();
-					//glPopName();
+					GL11.glPopName();
 				}
 			}
 
-			//glPopName();
+			GL11.glPopName();
 
 			GL11.glColor4f(red, green, blue, 1.0f);
 			GL11.glBegin(GL11.GL_LINES);
