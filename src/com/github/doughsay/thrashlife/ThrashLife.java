@@ -3,7 +3,6 @@ package com.github.doughsay.thrashlife;
 import java.util.Random;
 
 import org.lwjgl.LWJGLException;
-import org.lwjgl.Sys;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
@@ -12,10 +11,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 public class ThrashLife {
-
-	private long lastFrame;
-	private long lastFPS;
-	private int fps;
 
 	private boolean drawing = true, selecting = false;
 
@@ -37,19 +32,16 @@ public class ThrashLife {
 		cubes = new FastCubes(); // GL has to init before we can init the FastCubes class
 		cubes.load(world.getAll()); // load the current world state as geometry
 
-		getDelta(); // call once before loop to initialise lastFrame
-		lastFPS = getTime(); // call before loop to initialise fps timer
+		// initial render
+		renderGL();
 
 		while (!Display.isCloseRequested()) {
-			int delta = getDelta();
 
-			update(delta);
+			update();
 
 			if(playing) {
 				step(1);
 			}
-
-			renderGL();
 
 			Display.update();
 			Display.sync(60); // cap fps to 60fps
@@ -123,12 +115,15 @@ public class ThrashLife {
 		}
 		world.step(steps);
 		cubes.load(world.getAll());
+
+		renderGL();
 	}
 
 	public void initGL() {
 		try {
 			Display.setDisplayMode(new DisplayMode(screenX, screenY));
 			Display.create();
+			Display.setTitle("Thrashlife");
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -156,7 +151,7 @@ public class ThrashLife {
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 	}
 
-	public void update(int delta) {
+	public void update() {
 		if(Mouse.isButtonDown(0)) {
 			int mouseX = Mouse.getX();
 			int mouseY = -(Mouse.getY() - 600);
@@ -164,14 +159,24 @@ public class ThrashLife {
 			if(point != null) {
 				world.set(point.x, point.y, point.z, 1);
 				cubes.load(world.getAll());
+				renderGL();
 			}
 		}
 
 		if(Mouse.isButtonDown(1)) {
-			camera.rotate(Mouse.getDX(), Mouse.getDY());
+			int dx = Mouse.getDX();
+			int dy = Mouse.getDY();
+			if(dx != 0 || dy != 0) {
+				camera.rotate(dx, dy);
+				renderGL();
+			}
 		}
 
-		camera.zoom(Mouse.getDWheel());
+		int dw = Mouse.getDWheel();
+		if(dw != 0) {
+			camera.zoom(dw);
+			renderGL();
+		}
 
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
@@ -197,43 +202,6 @@ public class ThrashLife {
 				}
 			}
 		}
-
-		updateFPS(); // update FPS Counter
-	}
-
-	/**
-	 * Calculate how many milliseconds have passed
-	 * since last frame.
-	 *
-	 * @return milliseconds passed since last frame
-	 */
-	public int getDelta() {
-		long time = getTime();
-		int delta = (int) (time - lastFrame);
-		lastFrame = time;
-
-		return delta;
-	}
-
-	/**
-	 * Get the accurate system time
-	 *
-	 * @return The system time in milliseconds
-	 */
-	public long getTime() {
-		return (Sys.getTime() * 1000) / Sys.getTimerResolution();
-	}
-
-	/**
-	 * Calculate the FPS and set it in the title bar
-	 */
-	public void updateFPS() {
-		if (getTime() - lastFPS > 1000) {
-			Display.setTitle("FPS: " + fps + " - Generation: " + world.generation + " - Population: " + world.count());
-			fps = 0;
-			lastFPS += 1000;
-		}
-		fps++;
 	}
 
 	public void renderGL() {
