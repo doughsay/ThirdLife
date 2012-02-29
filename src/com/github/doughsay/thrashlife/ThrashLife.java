@@ -158,7 +158,9 @@ public class ThrashLife {
 
 	public void update(int delta) {
 		if(Mouse.isButtonDown(0)) {
-			Point point = grid.pick(Mouse.getX(), Mouse.getY());
+			int mouseX = Mouse.getX();
+			int mouseY = -(Mouse.getY() - 600);
+			Point point = grid.pick(mouseX, mouseY);
 			if(point != null) {
 				world.set(point.x, point.y, point.z, 1);
 				cubes.load(world.getAll());

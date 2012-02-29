@@ -117,6 +117,10 @@ public class Grid {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glInitNames();
 
+		GL11.glLoadIdentity();
+
+		camera.position();
+
 		draw();
 
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
@@ -144,8 +148,8 @@ public class Grid {
 							return new Point(px, py, pz);
 						case YZ:
 							px = origin.x;
-							py = origin.y + selBuf.get(index + 3);
-							pz = origin.z + selBuf.get(index + 4);
+							py = origin.y + selBuf.get(index + 4);
+							pz = origin.z + selBuf.get(index + 3);
 							return new Point(px, py, pz);
 						case XZ:
 							px = origin.x + selBuf.get(index + 3);
@@ -158,6 +162,7 @@ public class Grid {
 				index += (3 + numNames);
 			}
 		}
+
 		return null;
 	}
 
