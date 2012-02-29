@@ -3,13 +3,15 @@ package com.github.doughsay.thrashlife;
 import org.lwjgl.opengl.GL11;
 
 public class Camera {
+	private static final int MIN_DISTANCE = 3;
+	private static final double POWER = 2;
 	private int xRotation, yRotation, distance;
 	private Point origin;
 
 	public Camera() {
 		xRotation = yRotation = 0;
-		distance = 50;
-		origin = new Point(0,0,0);
+		distance = 5;
+		origin = new Point(0, 0, 0);
 	}
 
 	public void rotate(int dx, int dy) {
@@ -25,11 +27,11 @@ public class Camera {
 
 	public void zoom(int dw) {
 		distance -= (dw / 120);
-		if(distance < 5) { distance = 5; }
+		if(distance < MIN_DISTANCE) { distance = MIN_DISTANCE; }
 	}
 
 	public void position() {
-		GL11.glTranslatef(0f, 0f, -distance);
+		GL11.glTranslatef(0f, 0f, (float) -Math.pow(distance, POWER));
 		GL11.glRotatef(yRotation, 1f, 0f, 0f);
 		GL11.glRotatef(xRotation, 0f, 1f, 0f);
 		GL11.glTranslatef(origin.x, origin.y, origin.z);
@@ -40,7 +42,7 @@ public class Camera {
 	}
 
 	public int getDistance() {
-		return distance;
+		return (int) Math.pow(distance, POWER);
 	}
 
 	public int getXRotation() {

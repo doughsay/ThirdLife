@@ -4,6 +4,9 @@ import org.lwjgl.opengl.GL11;
 
 public class Grid {
 
+	private static final int MIN_SIZE = 10;
+	private static final int MAX_SIZE = 200;
+
 	public Grid() { }
 
 	public void draw(Camera camera) {
@@ -120,8 +123,8 @@ public class Grid {
 
 	private int gridSize(int distance) {
 		int gridSize = distance - 20;
-		if(gridSize < 10) { gridSize = 10; }
-		if(gridSize > 100) { gridSize = 100; }
+		if(gridSize < MIN_SIZE) { gridSize = MIN_SIZE; }
+		if(gridSize > MAX_SIZE) { gridSize = MAX_SIZE; }
 		return gridSize;
 	}
 
