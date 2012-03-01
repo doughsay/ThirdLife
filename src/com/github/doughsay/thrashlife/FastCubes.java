@@ -11,6 +11,9 @@ import org.lwjgl.opengl.GL11;
 public class FastCubes {
 
 	private int size = 0;
+	private static final float R = 1.0f;
+	private static final float G = 0.65f;
+	private static final float B = 0.45f;
 
 	private final float[] baseVertices = new float[] {
 		-0.45f, -0.45f, -0.45f, // 0
@@ -35,14 +38,14 @@ public class FastCubes {
 	private int[] indices = new int[24];
 
 	private final float[] colors = new float[] {
-		0.4f, 0.4f, 0.4f, // 0
-		0.2f, 0.2f, 0.2f, // 1
-		0.6f, 0.6f, 0.6f, // 2
-		0.4f, 0.4f, 0.4f, // 3
-		0.6f, 0.6f, 0.6f, // 4
-		0.4f, 0.4f, 0.4f, // 5
-		1.0f, 1.0f, 1.0f, // 6
-		0.6f, 0.6f, 0.6f  // 7
+		0.4f * R, 0.4f * G, 0.4f * B, // 0
+		0.2f * R, 0.2f * G, 0.2f * B, // 1
+		0.6f * R, 0.6f * G, 0.6f * B, // 2
+		0.4f * R, 0.4f * G, 0.4f * B, // 3
+		0.6f * R, 0.6f * G, 0.6f * B, // 4
+		0.4f * R, 0.4f * G, 0.4f * B, // 5
+		1.0f * R, 1.0f * G, 1.0f * B, // 6
+		0.6f * R, 0.6f * G, 0.6f * B  // 7
 	};
 
 	private FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(size);
