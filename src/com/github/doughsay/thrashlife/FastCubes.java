@@ -35,14 +35,14 @@ public class FastCubes {
 	private int[] indices = new int[24];
 
 	private final float[] colors = new float[] {
-		0.6f, 0.6f, 0.6f,
-		1.0f, 1.0f, 1.0f,
-		0.5f, 0.5f, 0.5f,
-		0.8f, 0.8f, 0.8f,
-		0.4f, 0.4f, 0.4f,
-		0.6f, 0.6f, 0.6f,
-		0.5f, 0.5f, 0.5f,
-		0.2f, 0.2f, 0.2f
+		0.4f, 0.4f, 0.4f, // 0
+		0.2f, 0.2f, 0.2f, // 1
+		0.6f, 0.6f, 0.6f, // 2
+		0.4f, 0.4f, 0.4f, // 3
+		0.6f, 0.6f, 0.6f, // 4
+		0.4f, 0.4f, 0.4f, // 5
+		1.0f, 1.0f, 1.0f, // 6
+		0.6f, 0.6f, 0.6f  // 7
 	};
 
 	private FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(size);
