@@ -15,6 +15,18 @@ public class FastCubes {
 	private static final float G = 0.65f;
 	private static final float B = 0.45f;
 
+	/*
+
+	4_ _ _ _5
+	|\      |\
+	| \_ _ _|_\
+	| |6    | |7
+	|_|_ _ _| |
+	\0|     \1|
+	 \|_ _ _ \|
+	  2       3
+
+	*/
 	private final float[] baseVertices = new float[] {
 		-0.45f, -0.45f, -0.45f, // 0
 		 0.45f, -0.45f, -0.45f, // 1
