@@ -218,7 +218,7 @@ public class ThrashLife {
 
 		// Draw the grid if needed
 		if(drawing || selecting) {
-			grid.draw();
+			//grid.draw();
 		}
 	}
 
