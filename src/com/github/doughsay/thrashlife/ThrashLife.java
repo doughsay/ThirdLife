@@ -32,6 +32,8 @@ public class ThrashLife {
 		cubes = new FastCubes(); // GL has to init before we can init the FastCubes class
 		cubes.load(world.getAll()); // load the current world state as geometry
 
+		updateTitle();
+
 		// initial render
 		renderGL();
 
@@ -114,9 +116,16 @@ public class ThrashLife {
 			world.collect();
 		}
 		world.step(steps);
+
+		updateTitle();
+
 		cubes.load(world.getAll());
 
 		renderGL();
+	}
+
+	private void updateTitle() {
+		Display.setTitle("Thrashlife - Generation: " + world.generation + " - Population: " + world.count());
 	}
 
 	public void initGL() {
