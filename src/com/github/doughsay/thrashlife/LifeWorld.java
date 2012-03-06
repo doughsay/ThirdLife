@@ -158,8 +158,8 @@ public class LifeWorld {
 		}
 	}
 
-	public ArrayList<Point> getAll() {
-		ArrayList<Point> cells = new ArrayList<Point>();
+	public ArrayList<int[]> getAll() {
+		ArrayList<int[]> cells = new ArrayList<int[]>();
 		root.getList(cells, originx, originy, originz);
 		return cells;
 	}

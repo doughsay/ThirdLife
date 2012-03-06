@@ -1,6 +1,7 @@
 package com.github.doughsay.thrashlife;
 
-import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 
 import org.lwjgl.opengl.ARBVertexBufferObject;
@@ -31,8 +32,8 @@ public class FastCubes {
 	private int iboCapacity = cubeIndexSize * 1000;
 
 	// pointers to the VBO and IBO
-	private ByteBuffer vertexBuffer;
-	private ByteBuffer indexBuffer;
+	private FloatBuffer vertexBuffer;
+	private IntBuffer indexBuffer;
 
 	/*
 
@@ -77,6 +78,9 @@ public class FastCubes {
 		{0.6f * R, 0.6f * G, 0.6f * B}  // 7
 	};
 
+	private final float[] tempVertexArray = new float[48];
+	private final int[] tempIndexArray = new int[24];
+
 	private final int vertexBufferID = ARBVertexBufferObject.glGenBuffersARB();
 	private final int indexBufferID  = ARBVertexBufferObject.glGenBuffersARB();
 
@@ -103,7 +107,7 @@ public class FastCubes {
 		GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
 	}
 
-	public void load(ArrayList<Point> points) {
+	public void load(ArrayList<int[]> points) {
 
 		numCubes = points.size();
 		if(numCubes == 0) {
@@ -123,17 +127,20 @@ public class FastCubes {
 
 		mapVertexBuffer();
 
-		for(Point point : points) {
+		for(int[] point : points) {
 
-			for(int j = 0; j < 8; j++) {
-				vertexBuffer.putFloat(baseVertices[j][0] + point.x);
-				vertexBuffer.putFloat(baseVertices[j][1] + point.y);
-				vertexBuffer.putFloat(baseVertices[j][2] + point.z);
+			for(int j = 0, l = 0; j < 8; j++) {
+				tempVertexArray[0 + (l * 6)] = baseVertices[j][0] + point[0];
+				tempVertexArray[1 + (l * 6)] = baseVertices[j][1] + point[1];
+				tempVertexArray[2 + (l * 6)] = baseVertices[j][2] + point[2];
 
-				vertexBuffer.putFloat(colors[j][0]);
-				vertexBuffer.putFloat(colors[j][1]);
-				vertexBuffer.putFloat(colors[j][2]);
+				tempVertexArray[3 + (l * 6)] = colors[j][0];
+				tempVertexArray[4 + (l * 6)] = colors[j][1];
+				tempVertexArray[5 + (l * 6)] = colors[j][2];
+				l++;
 			}
+
+			vertexBuffer.put(tempVertexArray);
 		}
 
 		vertexBuffer.flip();
@@ -144,8 +151,10 @@ public class FastCubes {
 
 		for(int i = 0; i < numCubes; i++) {
 			for(int k = 0; k < 24; k++) {
-				indexBuffer.putInt(baseIndices[k] + (i * 8));
+				tempIndexArray[k] = baseIndices[k] + (i * 8);
 			}
+
+			indexBuffer.put(tempIndexArray);
 		}
 
 		indexBuffer.flip();
@@ -156,13 +165,13 @@ public class FastCubes {
 	private void allocateVertexBuffer() {
 		//Allocate the vertex buffer for the elements
 		ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, vertexBufferID);
-		ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, vboCapacity, ARBVertexBufferObject.GL_STATIC_DRAW_ARB);
+		ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, vboCapacity, ARBVertexBufferObject.GL_STREAM_DRAW_ARB);
 	}
 
 	private void mapVertexBuffer() {
 		//Map the vertex buffer to a ByteBuffer
 		ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, vertexBufferID);
-		vertexBuffer = ARBVertexBufferObject.glMapBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, ARBVertexBufferObject.GL_WRITE_ONLY_ARB, vboCapacity, null);
+		vertexBuffer = ARBVertexBufferObject.glMapBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, ARBVertexBufferObject.GL_WRITE_ONLY_ARB, vboCapacity, null).asFloatBuffer();
 	}
 
 	private void unmapVertexBuffer() {
@@ -172,13 +181,13 @@ public class FastCubes {
 	private void allocateIndexBuffer() {
 		//Allocate the index buffer for the elements
 		ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, indexBufferID);
-		ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, iboCapacity, ARBVertexBufferObject.GL_STATIC_DRAW_ARB);
+		ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, iboCapacity, ARBVertexBufferObject.GL_STREAM_DRAW_ARB);
 	}
 
 	private void mapIndexBuffer() {
 		//Map the index buffer to a ByteBuffer
 		ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, indexBufferID);
-		indexBuffer = ARBVertexBufferObject.glMapBufferARB(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, ARBVertexBufferObject.GL_WRITE_ONLY_ARB, iboCapacity, null);
+		indexBuffer = ARBVertexBufferObject.glMapBufferARB(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, ARBVertexBufferObject.GL_WRITE_ONLY_ARB, iboCapacity, null).asIntBuffer();
 	}
 
 	private void unmapIndexBuffer() {

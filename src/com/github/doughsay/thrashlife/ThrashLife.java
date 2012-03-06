@@ -18,8 +18,8 @@ public class ThrashLife {
 	private FastCubes cubes;
 	private Grid grid = new Grid(camera);
 
-	private int screenX = 800;
-	private int screenY = 600;
+	private int screenX = 1280;
+	private int screenY = 1024;
 
 	private boolean playing = false;
 

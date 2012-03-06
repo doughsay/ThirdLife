@@ -54,7 +54,7 @@ public final class LifeNode {
 		return child.get(x % half, y % half, z % half);
 	}
 
-	public void getList(ArrayList<Point> result, int x, int y, int z/*, int[] rect*/) {
+	public void getList(ArrayList<int[]> result, int x, int y, int z/*, int[] rect*/) {
 		if(count == 0) {
 			return;
 		}
@@ -71,7 +71,7 @@ public final class LifeNode {
 		}
 		*/
 		if(level == 0) {
-			result.add(new Point(x, y, z));
+			result.add(new int[] {x, y, z});
 		}
 		else {
 			int half = width() / 2;
