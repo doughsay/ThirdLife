@@ -41,8 +41,10 @@ public class LifeWorld {
 
 	public LifeNode getNode(LifeNode fnw, LifeNode fne, LifeNode fsw, LifeNode fse, LifeNode bnw, LifeNode bne, LifeNode bsw, LifeNode bse) {
 		MemoKey key = new MemoKey(fnw.id, fne.id, fsw.id, fse.id, bnw.id, bne.id, bsw.id, bse.id);
-		if(memo.containsKey(key)) {
-			return memo.get(key);
+
+		LifeNode node = memo.get(key);
+		if(node != null) {
+			return node;
 		}
 		else {
 			LifeNode result = new LifeNode(this, nextId, fnw, fne, fsw, fse, bnw, bne, bsw, bse);
@@ -180,7 +182,7 @@ public class LifeWorld {
 		}
 		dbl();
 		dbl();
-		/*while(steps > root.genSteps()) {
+		while(steps > root.genSteps()) {
 			steps -= root.genSteps();
 			root = root.nextCenter(root.genSteps());
 			originx = originx + root.width() / 2;
@@ -188,13 +190,15 @@ public class LifeWorld {
 			originz = originz + root.width() / 2;
 			dbl();
 			dbl();
-		}*/
+		}
 		root = root.nextCenter(steps);
 		originx = originx + root.width() / 2;
 		originy = originy + root.width() / 2;
 		originz = originz + root.width() / 2;
 
 		generation += steps;
+
+		collect();
 	}
 
 	public int count() {

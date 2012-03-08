@@ -112,9 +112,6 @@ public class ThrashLife {
 	}
 
 	public void step(int steps) {
-		if(world.root.width() > Math.pow(2, 14)) {
-			world.collect();
-		}
 		world.step(steps);
 
 		updateTitle();

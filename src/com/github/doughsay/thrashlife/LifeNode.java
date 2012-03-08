@@ -101,10 +101,11 @@ public final class LifeNode {
 		if(steps == 0) {
 			return center();
 		}
-		if(cache.containsKey(steps)) {
-			return cache.get(steps);
-		}
 		LifeNode result;
+		result = cache.get(steps);
+		if(result != null) {
+			return result;
+		}
 		if(level == 2) {
 			int aaa = fnw.fnw.id, aba = fnw.fne.id, baa = fnw.fsw.id, bba = fnw.fse.id;
 			int aca = fne.fnw.id, ada = fne.fne.id, bca = fne.fsw.id, bda = fne.fse.id;
@@ -190,15 +191,18 @@ public final class LifeNode {
 				world.getNode(n111, n121, n211, n221, n112, n122, n212, n222).nextCenter(step2)
 			);
 		}
+
 		cache.put(steps, result);
 		return result;
 	}
 
 	public LifeNode center() {
-		if(cache.containsKey(0)) {
-			return cache.get(0);
+		LifeNode result = cache.get(0);
+		if(result != null) {
+			return result;
 		}
-		LifeNode result = world.getNode(
+
+		result = world.getNode(
 			fnw.bse,
 			fne.bsw,
 			fsw.bne,
