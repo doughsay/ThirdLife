@@ -1,7 +1,5 @@
 package com.github.doughsay.thrashlife;
 
-import java.util.Random;
-
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -12,11 +10,8 @@ import org.lwjgl.input.Mouse;
 
 public class ThrashLife {
 
-	private boolean drawing = true, selecting = false;
-
 	private Camera camera = new Camera();
 	private FastCubes cubes;
-	private Grid grid = new Grid(camera);
 
 	private int screenX = 1280;
 	private int screenY = 1024;
@@ -24,10 +19,12 @@ public class ThrashLife {
 	private boolean playing = false;
 
 	private LifeWorld world = new LifeWorld();
+	private DrawingHelper draw = new DrawingHelper(world);
 
-	public void start() {
-		line(200, 0, 0, 0);
+	public ThrashLife() {
+		draw.line(200, 0, 0, 0);
 
+		initDisplay();
 		initGL(); // init OpenGL
 		cubes = new FastCubes(); // GL has to init before we can init the FastCubes class
 		cubes.load(world.getAll()); // load the current world state as geometry
@@ -39,7 +36,7 @@ public class ThrashLife {
 
 		while (!Display.isCloseRequested()) {
 
-			update();
+			catchEvents();
 
 			if(playing) {
 				step(1);
@@ -52,72 +49,10 @@ public class ThrashLife {
 		Display.destroy();
 	}
 
-	public void set(int x, int y, int z) {
-		world.set(x, y, z, 1);
-	}
-
-	public void erase(int x, int y, int z) {
-		world.set(x, y, z, 0);
-	}
-
-	public void toggle(int x, int y, int z) {
-		world.set(x, y, z, world.get(x, y, z) == 1 ? 0 : 1);
-	}
-
-	public void line(int width, int ox, int oy, int oz) {
-		int half = width / 2;
-		for(int x = -half; x <= half; x++) {
-			for(int y = 0; y <= 1; y++) {
-				for(int z = 0; z <= 1; z++) {
-					set(ox+x, oy+y, oz+z);
-				}
-			}
-		}
-	}
-
-	public void randomFill(int width, int fillPercent, int ox, int oy, int oz) {
-		Random randomGenerator = new Random();
-		int half = width / 2;
-		for(int x = -half; x <= half; x++) {
-			for(int y = -half; y <= half; y++) {
-				for(int z = -half; z <= half; z++) {
-					if(randomGenerator.nextInt(100) < fillPercent) {
-						set(ox+x, oy+y, oz+z);
-					}
-				}
-			}
-		}
-	}
-
-	public void blinker(int x, int y, int z) {
-		set(x-1, y,   z);
-		set(  x, y,   z);
-		set(x+1, y,   z);
-		set(x-1, y+1, z);
-		set(  x, y+1, z);
-		set(x+1, y+1, z);
-	}
-
-	public void glider(int x, int y, int z) {
-		set(  x,   y,   z);
-		set(  x, y+1,   z);
-		set(  x, y+2,   z);
-		set(x+1, y+2,   z);
-		set(x+2, y+1,   z);
-		set(  x,   y, z+1);
-		set(  x, y+1, z+1);
-		set(  x, y+2, z+1);
-		set(x+1, y+2, z+1);
-		set(x+2, y+1, z+1);
-	}
-
 	public void step(int steps) {
 		world.step(steps);
-
 		updateTitle();
-
 		cubes.load(world.getAll());
-
 		renderGL();
 	}
 
@@ -125,7 +60,7 @@ public class ThrashLife {
 		Display.setTitle("Thrashlife - Generation: " + world.generation + " - Population: " + world.count());
 	}
 
-	public void initGL() {
+	public void initDisplay() {
 		try {
 			Display.setDisplayMode(new DisplayMode(screenX, screenY));
 			Display.create();
@@ -134,7 +69,9 @@ public class ThrashLife {
 			e.printStackTrace();
 			System.exit(0);
 		}
+	}
 
+	public void initGL() {
 		float aspectRatio = (float)screenX / (float)screenY;
 		GL11.glViewport(0, 0, screenX, screenY);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
@@ -157,8 +94,8 @@ public class ThrashLife {
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 	}
 
-	public void update() {
-		if(Mouse.isButtonDown(0)) {
+	public void catchEvents() {
+		/*if(Mouse.isButtonDown(0)) {
 			int mouseX = Mouse.getX();
 			int mouseY = -(Mouse.getY() - 600);
 			Point point = grid.pick(mouseX, mouseY);
@@ -167,7 +104,7 @@ public class ThrashLife {
 				cubes.load(world.getAll());
 				renderGL();
 			}
-		}
+		}*/
 
 		if(Mouse.isButtonDown(1)) {
 			int dx = Mouse.getDX();
@@ -221,15 +158,9 @@ public class ThrashLife {
 
 		// Draw the cubes
 		cubes.draw();
-
-		// Draw the grid if needed
-		if(drawing || selecting) {
-			//grid.draw();
-		}
 	}
 
 	public static void main(String[] argv) {
-		ThrashLife thrashLife = new ThrashLife();
-		thrashLife.start();
+		new ThrashLife();
 	}
 }

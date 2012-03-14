@@ -14,7 +14,7 @@ public final class MemoKey {
 		this.bseId = bseId;
 	}
 
-	public int[] toArray() {
+	protected int[] toArray() {
 		return new int[] {fnwId, fneId, fswId, fseId, bnwId, bneId, bswId, bseId};
 	}
 

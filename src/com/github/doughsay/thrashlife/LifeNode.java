@@ -41,11 +41,11 @@ public final class LifeNode {
 		this(world, id, null, null, null, null, null, null, null, null);
 	}
 
-	public LifeNode[] childrenArray() {
+	private LifeNode[] childrenArray() {
 		return new LifeNode[] {fnw, fne, fsw, fse, bnw, bne, bsw, bse};
 	}
 
-	public int get(int x, int y, int z) {
+	protected int get(int x, int y, int z) {
 		if(level == 0) {
 			return count;
 		}
@@ -54,7 +54,7 @@ public final class LifeNode {
 		return child.get(x % half, y % half, z % half);
 	}
 
-	public void getList(ArrayList<int[]> result, int x, int y, int z/*, int[] rect*/) {
+	protected void getList(ArrayList<int[]> result, int x, int y, int z/*, int[] rect*/) {
 		if(count == 0) {
 			return;
 		}
@@ -86,7 +86,7 @@ public final class LifeNode {
 		}
 	}
 
-	public LifeNode set(int x, int y, int z, int value) {
+	protected LifeNode set(int x, int y, int z, int value) {
 		if(level == 0) {
 			return world.single[value];
 		}
@@ -97,7 +97,7 @@ public final class LifeNode {
 		return world.getNode(children);
 	}
 
-	public LifeNode nextCenter(int steps) {
+	protected LifeNode nextCenter(int steps) {
 		if(steps == 0) {
 			return center();
 		}
@@ -196,7 +196,7 @@ public final class LifeNode {
 		return result;
 	}
 
-	public LifeNode center() {
+	private LifeNode center() {
 		LifeNode result = cache.get(0);
 		if(result != null) {
 			return result;
@@ -216,7 +216,7 @@ public final class LifeNode {
 		return result;
 	}
 
-	public LifeNode subQuad(int i) {
+	protected LifeNode subQuad(int i) {
 		switch(i) {
 			// front
 			case 0: return fnw;
@@ -261,11 +261,11 @@ public final class LifeNode {
 		}
 	}
 
-	public int width() {
+	protected int width() {
 		return 1 << level;
 	}
 
-	public int genSteps() {
+	protected int genSteps() {
 		return 1 << (level - 2);
 	}
 

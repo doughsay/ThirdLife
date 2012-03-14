@@ -39,7 +39,7 @@ public class LifeWorld {
 		root = E;
 	}
 
-	public LifeNode getNode(LifeNode fnw, LifeNode fne, LifeNode fsw, LifeNode fse, LifeNode bnw, LifeNode bne, LifeNode bsw, LifeNode bse) {
+	protected LifeNode getNode(LifeNode fnw, LifeNode fne, LifeNode fsw, LifeNode fse, LifeNode bnw, LifeNode bne, LifeNode bsw, LifeNode bse) {
 		MemoKey key = new MemoKey(fnw.id, fne.id, fsw.id, fse.id, bnw.id, bne.id, bsw.id, bse.id);
 
 		LifeNode node = memo.get(key);
@@ -54,11 +54,11 @@ public class LifeWorld {
 		}
 	}
 
-	public LifeNode getNode(LifeNode[] children) {
+	protected LifeNode getNode(LifeNode[] children) {
 		return getNode(children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7]);
 	}
 
-	public LifeNode emptyNode(int level) {
+	private LifeNode emptyNode(int level) {
 		if(level < empty.size()) {
 			return empty.get(level);
 		}
@@ -68,7 +68,7 @@ public class LifeWorld {
 		return result;
 	}
 
-	public LifeNode canonicalize(LifeNode node, HashMap<Integer, LifeNode> trans) {
+	private LifeNode canonicalize(LifeNode node, HashMap<Integer, LifeNode> trans) {
 		if(node.id < 258) {
 			return node;
 		}
@@ -87,13 +87,7 @@ public class LifeWorld {
 		return trans.get(node.id);
 	}
 
-	public void clear() {
-		root = single[0];
-		collect();
-		generation = 0;
-	}
-
-	public void collect() {
+	private void collect() {
 		trim();
 		empty.clear();
 		empty.add(single[0]);
@@ -108,7 +102,7 @@ public class LifeWorld {
 		root = canonicalize(root, trans);
 	}
 
-	public void trim() {
+	private void trim() {
 		while(true) {
 			if(root.count == 0) {
 				root = single[0];
@@ -134,7 +128,7 @@ public class LifeWorld {
 		}
 	}
 
-	public void dbl() {
+	private void dbl() {
 		if(root.level == 0) {
 			root = memo.get(new MemoKey(root.id, 0, 0, 0, 0, 0, 0, 0));
 			return;
@@ -150,6 +144,10 @@ public class LifeWorld {
 			getNode(e, root.bsw, e, e, e, e, e, e), getNode(root.bse, e, e, e, e, e, e, e)
 		);
 	}
+
+	/*
+	 * Public API
+	 */
 
 	public int get(int x, int y, int z) {
 		if(x < originx || y < originy || z < originz || x >= originx + root.width() || y >= originy + root.width() || z >= originz + root.width()) {
@@ -176,6 +174,18 @@ public class LifeWorld {
 		root = root.set(x - originx, y - originy, z - originz, value);
 	}
 
+	public void set(int x, int y, int z) {
+		set(x, y, z, 1);
+	}
+
+	public void unset(int x, int y, int z) {
+		set(x, y, z, 0);
+	}
+
+	public void toggle(int x, int y, int z) {
+		set(x, y, z, get(x, y, z) == 1 ? 0 : 1);
+	}
+
 	public void step(int steps) {
 		if(steps == 0) {
 			return;
@@ -199,6 +209,12 @@ public class LifeWorld {
 		generation += steps;
 
 		collect();
+	}
+
+	public void clear() {
+		root = single[0];
+		collect();
+		generation = 0;
 	}
 
 	public int count() {
