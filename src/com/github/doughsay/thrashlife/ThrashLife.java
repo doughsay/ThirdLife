@@ -1,14 +1,10 @@
 package com.github.doughsay.thrashlife;
 
-import java.awt.BorderLayout;
-import java.awt.Canvas;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javax.swing.*;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
@@ -35,7 +31,7 @@ public class ThrashLife {
 	private boolean closeRequested = false;
 	private final static AtomicReference<Dimension> newCanvasSize = new AtomicReference<Dimension>();
 
-	private Frame frame;
+	private JFrame frame;
 
 	public ThrashLife() {
 
@@ -87,8 +83,12 @@ public class ThrashLife {
 	}
 
 	private void initDisplay() throws LWJGLException {
-		frame = new Frame("Test");
-		frame.setLayout(new BorderLayout());
+		initLookAndFeel();
+
+		frame = new JFrame("Test");
+
+		initMenus();
+
 		final Canvas canvas = new Canvas();
 
 		canvas.addComponentListener(new ComponentAdapter() {
@@ -112,7 +112,7 @@ public class ThrashLife {
 			}
 		});
 
-		frame.add(canvas, BorderLayout.CENTER);
+		frame.getContentPane().add(canvas);
 
 		Display.setParent(canvas);
 		Display.setVSyncEnabled(true);
@@ -122,6 +122,85 @@ public class ThrashLife {
 		frame.pack();
 		frame.setVisible(true);
 		Display.create();
+	}
+
+	private void initMenus() {
+
+		int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+
+		//Create the menu bar.
+		JMenuBar menuBar = new JMenuBar();
+
+		//Build the file menu.
+		JMenu fileMenu = new JMenu("File");
+		fileMenu.setMnemonic(KeyEvent.VK_F);
+		menuBar.add(fileMenu);
+
+		//file menuItems
+		JMenuItem clearItem = new JMenuItem("Clear", KeyEvent.VK_N);
+		clearItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
+		fileMenu.add(clearItem);
+
+		JMenuItem openItem = new JMenuItem("Open...", KeyEvent.VK_O);
+		openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, mask));
+		fileMenu.add(openItem);
+
+		JMenuItem saveItem = new JMenuItem("Save As...", KeyEvent.VK_S);
+		saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
+		fileMenu.add(saveItem);
+
+		//Build the edit menu.
+		JMenu editMenu = new JMenu("Edit");
+		editMenu.setMnemonic(KeyEvent.VK_E);
+		menuBar.add(editMenu);
+
+		//edit menuItems
+		JMenuItem drawModeItem = new JCheckBoxMenuItem("Draw Mode");
+		drawModeItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, mask));
+		editMenu.add(drawModeItem);
+
+		//Build the run menu.
+		JMenu runMenu = new JMenu("Run");
+		runMenu.setMnemonic(KeyEvent.VK_R);
+		menuBar.add(runMenu);
+
+		//file menuItems
+		JMenuItem playPauseItem = new JMenuItem("Play", KeyEvent.VK_P);
+		playPauseItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
+		runMenu.add(playPauseItem);
+
+		JMenuItem stepItem = new JMenuItem("Step", KeyEvent.VK_T);
+		stepItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+		runMenu.add(stepItem);
+
+		JMenuItem doubleStepItem = new JMenuItem("Double Step", KeyEvent.VK_D);
+		doubleStepItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, mask));
+		runMenu.add(doubleStepItem);
+
+		frame.setJMenuBar(menuBar);
+	}
+
+	private void initLookAndFeel() {
+		if(isMac()) {
+			System.setProperty("apple.laf.useScreenMenuBar", "true");
+			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "ThrashLife");
+		}
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private boolean isMac() {
+		String osName = System.getProperty("os.name");
+		return osName.startsWith("Mac OS X");
 	}
 
 	private void initGL() {
