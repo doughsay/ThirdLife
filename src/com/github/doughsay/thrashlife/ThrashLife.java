@@ -1,8 +1,17 @@
 package com.github.doughsay.thrashlife;
 
+import java.awt.BorderLayout;
+import java.awt.Canvas;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.input.Keyboard;
@@ -13,20 +22,35 @@ public class ThrashLife {
 	private Camera camera = new Camera();
 	private FastCubes cubes;
 
-	private int screenX = 1280;
-	private int screenY = 1024;
+	private static final int preferredScreenX = 1280;
+	private static final int preferredScreenY = 1024;
+	private static final int minScreenX = 640;
+	private static final int minScreenY = 480;
 
 	private boolean playing = false;
 
 	private LifeWorld world = new LifeWorld();
 	private DrawingHelper draw = new DrawingHelper(world);
 
-	public ThrashLife() {
-		draw.line(200, 0, 0, 0);
+	private boolean closeRequested = false;
+	private final static AtomicReference<Dimension> newCanvasSize = new AtomicReference<Dimension>();
 
-		initDisplay();
-		initGL(); // init OpenGL
+	private Frame frame;
+
+	public ThrashLife() {
+
+		try {
+			initDisplay();
+		}
+		catch (LWJGLException e) {
+			e.printStackTrace();
+		}
+
+		initGL();
 		cubes = new FastCubes(); // GL has to init before we can init the FastCubes class
+
+		// put some initial cells for testing
+		draw.line(200, 0, 0, 0);
 		cubes.load(world.getAll()); // load the current world state as geometry
 
 		updateTitle();
@@ -34,50 +58,75 @@ public class ThrashLife {
 		// initial render
 		renderGL();
 
-		while (!Display.isCloseRequested()) {
+		while(!Display.isCloseRequested() && !closeRequested) {
 
-			catchEvents();
+			boolean render = processEvents();
 
-			if(playing) {
-				step(1);
+			if(render) {
+				renderGL();
+				Display.update();
 			}
-
-			Display.update();
-			Display.sync(60); // cap fps to 60fps
+			else {
+				Display.processMessages();
+			}
 		}
 
 		Display.destroy();
+		frame.dispose();
+		System.exit(0);
 	}
 
-	public void step(int steps) {
+	private void step(int steps) {
 		world.step(steps);
 		updateTitle();
 		cubes.load(world.getAll());
-		renderGL();
 	}
 
 	private void updateTitle() {
-		Display.setTitle("Thrashlife - Generation: " + world.generation + " - Population: " + world.count());
+		frame.setTitle("Thrashlife - Generation: " + world.generation + " - Population: " + world.count());
 	}
 
-	public void initDisplay() {
-		try {
-			Display.setDisplayMode(new DisplayMode(screenX, screenY));
-			Display.create();
-			Display.setTitle("Thrashlife");
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
+	private void initDisplay() throws LWJGLException {
+		frame = new Frame("Test");
+		frame.setLayout(new BorderLayout());
+		final Canvas canvas = new Canvas();
+
+		canvas.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				newCanvasSize.set(canvas.getSize());
+			}
+		});
+
+		frame.addWindowFocusListener(new WindowAdapter() {
+			@Override
+			public void windowGainedFocus(WindowEvent e) {
+				canvas.requestFocusInWindow();
+			}
+		});
+
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				closeRequested = true;
+			}
+		});
+
+		frame.add(canvas, BorderLayout.CENTER);
+
+		Display.setParent(canvas);
+		Display.setVSyncEnabled(true);
+
+		frame.setPreferredSize(new Dimension(preferredScreenX, preferredScreenY));
+		frame.setMinimumSize(new Dimension(minScreenX, minScreenY));
+		frame.pack();
+		frame.setVisible(true);
+		Display.create();
 	}
 
-	public void initGL() {
-		float aspectRatio = (float)screenX / (float)screenY;
-		GL11.glViewport(0, 0, screenX, screenY);
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glLoadIdentity();
-		GLU.gluPerspective(45f, aspectRatio, 1f, 1000f);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+	private void initGL() {
+		setViewport(preferredScreenX, preferredScreenY);
+
 		GL11.glClearColor(0.6f, 0.77f, 0.95f, 1f);
 		GL11.glClearDepth(1f);
 
@@ -94,7 +143,18 @@ public class ThrashLife {
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 	}
 
-	public void catchEvents() {
+	private void setViewport(int width, int height) {
+		float aspectRatio = (float)width / (float)height;
+		GL11.glViewport(0, 0, width, height);
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadIdentity();
+		GLU.gluPerspective(45f, aspectRatio, 1f, 10000f);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+	}
+
+	private boolean processEvents() {
+		boolean render = false;
+
 		/*if(Mouse.isButtonDown(0)) {
 			int mouseX = Mouse.getX();
 			int mouseY = -(Mouse.getY() - 600);
@@ -111,20 +171,21 @@ public class ThrashLife {
 			int dy = Mouse.getDY();
 			if(dx != 0 || dy != 0) {
 				camera.rotate(dx, dy);
-				renderGL();
+				render = true;
 			}
 		}
 
 		int dw = Mouse.getDWheel();
 		if(dw != 0) {
 			camera.zoom(dw);
-			renderGL();
+			render = true;
 		}
 
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				if (Keyboard.getEventKey() == Keyboard.KEY_SPACE) {
 					step(1);
+					render = true;
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_D) {
@@ -134,6 +195,7 @@ public class ThrashLife {
 					else {
 						step(world.generation * 2);
 					}
+					render = true;
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_S) {
@@ -145,9 +207,23 @@ public class ThrashLife {
 				}
 			}
 		}
+
+		Dimension newDim = newCanvasSize.getAndSet(null);
+
+		if(newDim != null) {
+			setViewport(newDim.width, newDim.height);
+			render = true;
+		}
+
+		if(playing) {
+			step(1);
+			render = true;
+		}
+
+		return render;
 	}
 
-	public void renderGL() {
+	private void renderGL() {
 
 		// Clear the screen / depth buffers and load identity modelview matrix
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
