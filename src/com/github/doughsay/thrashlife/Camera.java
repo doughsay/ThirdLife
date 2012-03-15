@@ -14,6 +14,12 @@ public class Camera {
 		origin = new Point(0, 0, 0);
 	}
 
+	public void reset() {
+		xRotation = yRotation = 0;
+		distance = 5;
+		origin = new Point(0, 0, 0);
+	}
+
 	public void rotate(int dx, int dy) {
 		xRotation += dx;
 		yRotation -= dy;

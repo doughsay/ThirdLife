@@ -2,6 +2,7 @@ package com.github.doughsay.thrashlife;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.*;
@@ -10,7 +11,6 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 public class ThrashLife {
@@ -29,9 +29,12 @@ public class ThrashLife {
 	private DrawingHelper draw = new DrawingHelper(world);
 
 	private boolean closeRequested = false;
+	private boolean render = true;
 	private final static AtomicReference<Dimension> newCanvasSize = new AtomicReference<Dimension>();
 
 	private JFrame frame;
+
+	private LinkedList<LifeAction> actions = new LinkedList<LifeAction>();
 
 	public ThrashLife() {
 
@@ -51,12 +54,9 @@ public class ThrashLife {
 
 		updateTitle();
 
-		// initial render
-		renderGL();
-
 		while(!Display.isCloseRequested() && !closeRequested) {
 
-			boolean render = processEvents();
+			processEvents();
 
 			if(render) {
 				renderGL();
@@ -131,51 +131,95 @@ public class ThrashLife {
 		//Create the menu bar.
 		JMenuBar menuBar = new JMenuBar();
 
-		//Build the file menu.
+		//Edit menu
+		JMenu editMenu = new JMenu("Edit");
+		editMenu.setMnemonic(KeyEvent.VK_E);
+
+		JMenuItem drawModeItem = new JCheckBoxMenuItem("Draw Mode");
+		drawModeItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, mask));
+		////
+
+		//Run menu
+		JMenu runMenu = new JMenu("Run");
+		runMenu.setMnemonic(KeyEvent.VK_R);
+
+		final JMenuItem stepItem = new JMenuItem("Step", KeyEvent.VK_T);
+		stepItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+		stepItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				actions.add(LifeAction.STEP);
+			}
+		});
+
+		final JMenuItem doubleStepItem = new JMenuItem("Double Step", KeyEvent.VK_D);
+		doubleStepItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, mask));
+		doubleStepItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				actions.add(LifeAction.DOUBLE_STEP);
+			}
+		});
+
+		final JMenuItem playPauseItem = new JMenuItem("Play", KeyEvent.VK_P);
+		playPauseItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
+		playPauseItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				if(playing) {
+					actions.add(LifeAction.PAUSE);
+					playPauseItem.setText("Play");
+					stepItem.setEnabled(true);
+					doubleStepItem.setEnabled(true);
+				}
+				else {
+					actions.add(LifeAction.PLAY);
+					playPauseItem.setText("Pause");
+					stepItem.setEnabled(false);
+					doubleStepItem.setEnabled(false);
+				}
+			}
+		});
+		////
+
+		//File menu
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.setMnemonic(KeyEvent.VK_F);
-		menuBar.add(fileMenu);
 
-		//file menuItems
 		JMenuItem clearItem = new JMenuItem("Clear", KeyEvent.VK_N);
 		clearItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
-		fileMenu.add(clearItem);
+		clearItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				if(playing) {
+					actions.add(LifeAction.PAUSE);
+					playPauseItem.setText("Play");
+					stepItem.setEnabled(true);
+					doubleStepItem.setEnabled(true);
+				}
+				actions.add(LifeAction.CLEAR);
+			}
+		});
 
 		JMenuItem openItem = new JMenuItem("Open...", KeyEvent.VK_O);
 		openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, mask));
-		fileMenu.add(openItem);
 
 		JMenuItem saveItem = new JMenuItem("Save As...", KeyEvent.VK_S);
 		saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
+		////
+
+		menuBar.add(fileMenu);
+		fileMenu.add(clearItem);
+		fileMenu.add(openItem);
 		fileMenu.add(saveItem);
 
-		//Build the edit menu.
-		JMenu editMenu = new JMenu("Edit");
-		editMenu.setMnemonic(KeyEvent.VK_E);
 		menuBar.add(editMenu);
-
-		//edit menuItems
-		JMenuItem drawModeItem = new JCheckBoxMenuItem("Draw Mode");
-		drawModeItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, mask));
 		editMenu.add(drawModeItem);
 
-		//Build the run menu.
-		JMenu runMenu = new JMenu("Run");
-		runMenu.setMnemonic(KeyEvent.VK_R);
-		menuBar.add(runMenu);
-
-		//file menuItems
-		JMenuItem playPauseItem = new JMenuItem("Play", KeyEvent.VK_P);
-		playPauseItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
 		runMenu.add(playPauseItem);
-
-		JMenuItem stepItem = new JMenuItem("Step", KeyEvent.VK_T);
-		stepItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
 		runMenu.add(stepItem);
-
-		JMenuItem doubleStepItem = new JMenuItem("Double Step", KeyEvent.VK_D);
-		doubleStepItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, mask));
 		runMenu.add(doubleStepItem);
+		menuBar.add(runMenu);
 
 		frame.setJMenuBar(menuBar);
 	}
@@ -231,20 +275,42 @@ public class ThrashLife {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 	}
 
-	private boolean processEvents() {
-		boolean render = false;
+	private void processEvents() {
 
-		/*if(Mouse.isButtonDown(0)) {
-			int mouseX = Mouse.getX();
-			int mouseY = -(Mouse.getY() - 600);
-			Point point = grid.pick(mouseX, mouseY);
-			if(point != null) {
-				world.set(point.x, point.y, point.z, 1);
+		// process our events
+		while(!actions.isEmpty()) {
+			LifeAction action = actions.pop();
+			switch(action) {
+			case CLEAR:
+				world.clear();
+				updateTitle();
 				cubes.load(world.getAll());
-				renderGL();
+				camera.reset();
+				render = true;
+				break;
+			case PLAY:
+				playing = true;
+				break;
+			case PAUSE:
+				playing = false;
+				break;
+			case STEP:
+				step(1);
+				render = true;
+				break;
+			case DOUBLE_STEP:
+				if(world.generation == 0) {
+					step(1);
+				}
+				else {
+					step(world.generation * 2);
+				}
+				render = true;
+				break;
 			}
-		}*/
+		}
 
+		// rotate camera
 		if(Mouse.isButtonDown(1)) {
 			int dx = Mouse.getDX();
 			int dy = Mouse.getDY();
@@ -254,39 +320,14 @@ public class ThrashLife {
 			}
 		}
 
+		// zoom camera
 		int dw = Mouse.getDWheel();
 		if(dw != 0) {
 			camera.zoom(dw);
 			render = true;
 		}
 
-		while (Keyboard.next()) {
-			if (Keyboard.getEventKeyState()) {
-				if (Keyboard.getEventKey() == Keyboard.KEY_SPACE) {
-					step(1);
-					render = true;
-				}
-
-				if (Keyboard.getEventKey() == Keyboard.KEY_D) {
-					if(world.generation == 0) {
-						step(1);
-					}
-					else {
-						step(world.generation * 2);
-					}
-					render = true;
-				}
-
-				if (Keyboard.getEventKey() == Keyboard.KEY_S) {
-					playing = true;
-				}
-
-				if (Keyboard.getEventKey() == Keyboard.KEY_P) {
-					playing = false;
-				}
-			}
-		}
-
+		// see if the canvas size was adjusted
 		Dimension newDim = newCanvasSize.getAndSet(null);
 
 		if(newDim != null) {
@@ -294,12 +335,11 @@ public class ThrashLife {
 			render = true;
 		}
 
+		// step if playing
 		if(playing) {
 			step(1);
 			render = true;
 		}
-
-		return render;
 	}
 
 	private void renderGL() {
@@ -318,4 +358,6 @@ public class ThrashLife {
 	public static void main(String[] argv) {
 		new ThrashLife();
 	}
+
+	public enum LifeAction { CLEAR, PLAY, PAUSE, STEP, DOUBLE_STEP };
 }
