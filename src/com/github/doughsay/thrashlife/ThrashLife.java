@@ -13,6 +13,7 @@ public class ThrashLife {
 
 	private Camera camera = new Camera();
 	private FastCubes cubes;
+	private FastGrid grid;
 
 	private boolean playing = false;
 
@@ -38,6 +39,7 @@ public class ThrashLife {
 
 		initGL();
 		cubes = new FastCubes(); // GL has to init before we can init the FastCubes class
+		grid = new FastGrid(camera); // same
 
 		// put some initial cells for testing
 		draw.line(200, 0, 0, 0);
@@ -77,7 +79,6 @@ public class ThrashLife {
 		Dimension d = gui.getCanvasDimensions();
 		setViewport(d.width, d.height);
 
-		GL11.glClearColor(0.6f, 0.77f, 0.95f, 1f);
 		GL11.glClearDepth(1f);
 
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -89,8 +90,8 @@ public class ThrashLife {
 
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
+		// I heard this was bad?
 		GL11.glLineWidth(2.0f);
-		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 	}
 
 	private void setViewport(int width, int height) {
@@ -137,6 +138,22 @@ public class ThrashLife {
 			}
 		}
 
+		// color pick
+		if(Mouse.isButtonDown(0)) {
+			Dimension d = gui.getCanvasDimensions();
+			int x = Mouse.getX();
+			int y = Mouse.getY();
+
+			int[] p = renderColorPick(x, y);
+
+			if(p != null) {
+				world.set(p[0], p[1], p[2]);
+				updateTitle();
+				cubes.load(world.getAll());
+				render = true;
+			}
+		}
+
 		// rotate camera
 		if(Mouse.isButtonDown(1)) {
 			int dx = Mouse.getDX();
@@ -170,6 +187,7 @@ public class ThrashLife {
 	}
 
 	private void renderGL() {
+		GL11.glClearColor(0.6f, 0.77f, 0.95f, 1f);
 
 		// Clear the screen / depth buffers and load identity modelview matrix
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
@@ -180,6 +198,23 @@ public class ThrashLife {
 
 		// Draw the cubes
 		cubes.draw();
+
+		// Draw the grid
+		grid.draw();
+	}
+
+	private int[] renderColorPick(int x, int y) {
+		GL11.glClearColor(1f, 1f, 1f, 1f);
+
+		// Clear the screen / depth buffers and load identity modelview matrix
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glLoadIdentity();
+
+		// Position the camera
+		camera.position();
+
+		// Draw the color pick grid
+		return grid.colorPick(x, y);
 	}
 
 	public void enqueueAction(LifeAction action) {
