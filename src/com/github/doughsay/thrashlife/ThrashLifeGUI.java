@@ -2,6 +2,7 @@ package com.github.doughsay.thrashlife;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.net.URL;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.*;
@@ -34,11 +35,7 @@ public class ThrashLifeGUI extends JFrame {
 
 		initLookAndFeel();
 		initMenus();
-
-		/*
-		JToolBar toolBar = new JToolBar();
-		frame.add(toolBar, BorderLayout.PAGE_START);
-		*/
+		initToolBar();
 
 		canvas = new Canvas();
 
@@ -192,6 +189,34 @@ public class ThrashLifeGUI extends JFrame {
 		menuBar.add(runMenu);
 
 		setJMenuBar(menuBar);
+	}
+
+	private void initToolBar() {
+		JToolBar toolBar = new JToolBar();
+
+		//Look for the image.
+		String imgLocation = "images/play.png";
+		URL imageURL = ThrashLifeGUI.class.getResource(imgLocation);
+
+		//Create and initialize the button.
+		JButton button = new JButton();
+		//button.setActionCommand(actionCommand);
+		button.setToolTipText("Play");
+		//button.addActionListener(this);
+
+		if(imageURL != null) {
+			button.setIcon(new ImageIcon(imageURL, "Play"));
+		}
+		else {
+			button.setText("Play");
+			System.err.println("Resource not found: " + imgLocation);
+		}
+
+		toolBar.add(button);
+
+		toolBar.setFloatable(false);
+		toolBar.setRollover(true);
+		add(toolBar, BorderLayout.PAGE_START);
 	}
 
 	private void initLookAndFeel() {
