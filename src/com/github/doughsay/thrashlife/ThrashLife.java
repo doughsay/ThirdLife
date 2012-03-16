@@ -1,11 +1,7 @@
 package com.github.doughsay.thrashlife;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Dimension;
 import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.swing.*;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
@@ -18,28 +14,23 @@ public class ThrashLife {
 	private Camera camera = new Camera();
 	private FastCubes cubes;
 
-	private static final int preferredScreenX = 1280;
-	private static final int preferredScreenY = 1024;
-	private static final int minScreenX = 640;
-	private static final int minScreenY = 480;
-
 	private boolean playing = false;
 
 	private LifeWorld world = new LifeWorld();
 	private DrawingHelper draw = new DrawingHelper(world);
 
-	private boolean closeRequested = false;
 	private boolean render = true;
-	private final static AtomicReference<Dimension> newCanvasSize = new AtomicReference<Dimension>();
 
-	private JFrame frame;
+	private ThrashLifeGUI gui;
 
 	private LinkedList<LifeAction> actions = new LinkedList<LifeAction>();
 
 	public ThrashLife() {
 
+		gui = new ThrashLifeGUI(this);
+
 		try {
-			initDisplay();
+			gui.initDisplay();
 		}
 		catch (LWJGLException e) {
 			e.printStackTrace();
@@ -54,7 +45,7 @@ public class ThrashLife {
 
 		updateTitle();
 
-		while(!Display.isCloseRequested() && !closeRequested) {
+		while(!Display.isCloseRequested() && !gui.isCloseRequested()) {
 
 			processEvents();
 
@@ -68,7 +59,7 @@ public class ThrashLife {
 		}
 
 		Display.destroy();
-		frame.dispose();
+		gui.dispose();
 		System.exit(0);
 	}
 
@@ -79,176 +70,12 @@ public class ThrashLife {
 	}
 
 	private void updateTitle() {
-		frame.setTitle("Thrashlife - Generation: " + world.generation + " - Population: " + world.count());
-	}
-
-	private void initDisplay() throws LWJGLException {
-		initLookAndFeel();
-
-		frame = new JFrame("Test");
-
-		initMenus();
-
-		final Canvas canvas = new Canvas();
-
-		canvas.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				newCanvasSize.set(canvas.getSize());
-			}
-		});
-
-		frame.addWindowFocusListener(new WindowAdapter() {
-			@Override
-			public void windowGainedFocus(WindowEvent e) {
-				canvas.requestFocusInWindow();
-			}
-		});
-
-		frame.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				closeRequested = true;
-			}
-		});
-
-		frame.getContentPane().add(canvas);
-
-		Display.setParent(canvas);
-		Display.setVSyncEnabled(true);
-
-		frame.setPreferredSize(new Dimension(preferredScreenX, preferredScreenY));
-		frame.setMinimumSize(new Dimension(minScreenX, minScreenY));
-		frame.pack();
-		frame.setVisible(true);
-		Display.create();
-	}
-
-	private void initMenus() {
-
-		int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-
-		//Create the menu bar.
-		JMenuBar menuBar = new JMenuBar();
-
-		//Edit menu
-		JMenu editMenu = new JMenu("Edit");
-		editMenu.setMnemonic(KeyEvent.VK_E);
-
-		JMenuItem drawModeItem = new JCheckBoxMenuItem("Draw Mode");
-		drawModeItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, mask));
-		////
-
-		//Run menu
-		JMenu runMenu = new JMenu("Run");
-		runMenu.setMnemonic(KeyEvent.VK_R);
-
-		final JMenuItem stepItem = new JMenuItem("Step", KeyEvent.VK_T);
-		stepItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
-		stepItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				actions.add(LifeAction.STEP);
-			}
-		});
-
-		final JMenuItem doubleStepItem = new JMenuItem("Double Step", KeyEvent.VK_D);
-		doubleStepItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, mask));
-		doubleStepItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				actions.add(LifeAction.DOUBLE_STEP);
-			}
-		});
-
-		final JMenuItem playPauseItem = new JMenuItem("Play", KeyEvent.VK_P);
-		playPauseItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
-		playPauseItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				if(playing) {
-					actions.add(LifeAction.PAUSE);
-					playPauseItem.setText("Play");
-					stepItem.setEnabled(true);
-					doubleStepItem.setEnabled(true);
-				}
-				else {
-					actions.add(LifeAction.PLAY);
-					playPauseItem.setText("Pause");
-					stepItem.setEnabled(false);
-					doubleStepItem.setEnabled(false);
-				}
-			}
-		});
-		////
-
-		//File menu
-		JMenu fileMenu = new JMenu("File");
-		fileMenu.setMnemonic(KeyEvent.VK_F);
-
-		JMenuItem clearItem = new JMenuItem("Clear", KeyEvent.VK_N);
-		clearItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
-		clearItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				if(playing) {
-					actions.add(LifeAction.PAUSE);
-					playPauseItem.setText("Play");
-					stepItem.setEnabled(true);
-					doubleStepItem.setEnabled(true);
-				}
-				actions.add(LifeAction.CLEAR);
-			}
-		});
-
-		JMenuItem openItem = new JMenuItem("Open...", KeyEvent.VK_O);
-		openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, mask));
-
-		JMenuItem saveItem = new JMenuItem("Save As...", KeyEvent.VK_S);
-		saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
-		////
-
-		menuBar.add(fileMenu);
-		fileMenu.add(clearItem);
-		fileMenu.add(openItem);
-		fileMenu.add(saveItem);
-
-		menuBar.add(editMenu);
-		editMenu.add(drawModeItem);
-
-		runMenu.add(playPauseItem);
-		runMenu.add(stepItem);
-		runMenu.add(doubleStepItem);
-		menuBar.add(runMenu);
-
-		frame.setJMenuBar(menuBar);
-	}
-
-	private void initLookAndFeel() {
-		if(isMac()) {
-			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "ThrashLife");
-		}
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private boolean isMac() {
-		String osName = System.getProperty("os.name");
-		return osName.startsWith("Mac OS X");
+		gui.setTitle("Thrashlife - Generation: " + world.generation + " - Population: " + world.count());
 	}
 
 	private void initGL() {
-		setViewport(preferredScreenX, preferredScreenY);
+		Dimension d = gui.getCanvasDimensions();
+		setViewport(d.width, d.height);
 
 		GL11.glClearColor(0.6f, 0.77f, 0.95f, 1f);
 		GL11.glClearDepth(1f);
@@ -328,10 +155,10 @@ public class ThrashLife {
 		}
 
 		// see if the canvas size was adjusted
-		Dimension newDim = newCanvasSize.getAndSet(null);
+		Dimension d = gui.getNewCanvasDimensions();
 
-		if(newDim != null) {
-			setViewport(newDim.width, newDim.height);
+		if(d != null) {
+			setViewport(d.width, d.height);
 			render = true;
 		}
 
@@ -355,9 +182,17 @@ public class ThrashLife {
 		cubes.draw();
 	}
 
+	public void enqueueAction(LifeAction action) {
+		actions.add(action);
+	};
+
+	public boolean isPlaying() {
+		return playing;
+	}
+
 	public static void main(String[] argv) {
 		new ThrashLife();
 	}
 
-	public enum LifeAction { CLEAR, PLAY, PAUSE, STEP, DOUBLE_STEP };
+	public enum LifeAction { CLEAR, PLAY, PAUSE, STEP, DOUBLE_STEP }
 }
