@@ -25,6 +25,7 @@ public class ThrashLife {
 	private ThrashLifeGUI gui;
 
 	private LinkedList<LifeAction> actions = new LinkedList<LifeAction>();
+	private DrawingState pencil = new DrawingState(new PointBrush(world));
 
 	public ThrashLife() {
 
@@ -43,7 +44,7 @@ public class ThrashLife {
 
 		// put some initial cells for testing
 		//draw.thickLine(200, 0, 0, 0);
-		draw.line(-10,0,0,10,0,0, BallBrush.class);
+		draw.line(-10,0,0,10,0,0);
 		cubes.load(world.getAll()); // load the current world state as geometry
 
 		updateTitle();
@@ -141,17 +142,32 @@ public class ThrashLife {
 
 		// color pick
 		if(Mouse.isButtonDown(0)) {
-			int x = Mouse.getX();
-			int y = Mouse.getY();
 
-			int[] p = renderColorPick(x, y);
+			int mx = Mouse.getX();
+			int my = Mouse.getY();
+
+			int[] p = renderColorPick(mx, my);
 
 			if(p != null) {
-				world.set(p[0], p[1], p[2]);
+
+				if(pencil.isDrawing()) {
+					pencil.next(p);
+				}
+				else {
+					pencil.start(p);
+				}
+
+				draw.draw(pencil);
 				updateTitle();
 				cubes.load(world.getAll());
 				render = true;
 			}
+			else {
+				pencil.stop();
+			}
+		}
+		else {
+			pencil.stop();
 		}
 
 		// rotate camera

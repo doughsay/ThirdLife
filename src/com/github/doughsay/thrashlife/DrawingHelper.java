@@ -11,36 +11,25 @@ public class DrawingHelper {
 		this.world = world;
 	}
 
-	public void thickLine(int width, int ox, int oy, int oz) {
-		int half = width / 2;
-		for(int x = -half; x <= half; x++) {
-			for(int y = 0; y <= 1; y++) {
-				for(int z = 0; z <= 1; z++) {
-					world.set(ox+x, oy+y, oz+z);
-				}
-			}
-		}
+	// draw the current drawingState
+	public void draw(DrawingState pencil) {
+		line(pencil.oldX, pencil.oldY, pencil.oldZ, pencil.x, pencil.y, pencil.z, pencil.getBrush());
 	}
 
+	// draw line using basic brush
 	public void line(int x1, int y1, int z1, int x2, int y2, int z2) {
-		line(x1, y1, z1, x2, y2, z2, PointBrush.class);
+		line(x1, y1, z1, x2, y2, z2, new PointBrush(world));
 	}
 
-	// fake 3d Bresenham line drawing (assume axis-aligned plane)
-	public void line(int x1, int y1, int z1, int x2, int y2, int z2, Class<? extends Brush> brush) {
+	// fake 3d Bresenham line drawing (assume axis-aligned plane), with parameterized brush
+	public void line(int x1, int y1, int z1, int x2, int y2, int z2, Brush brush) {
 		if(x1 == x2) { line(z1, y1, z2, y2, x1, Plane.YZ, brush); return; }
 		if(y1 == y2) { line(x1, z1, x2, z2, y1, Plane.XZ, brush); return; }
 		if(z1 == z2) { line(x1, y1, x2, y2, z1, Plane.XY, brush); return; }
 	}
 
-	private void line(int x, int y, int x2, int y2, int other, Plane plane, Class<? extends Brush> brush) {
-		Brush brushInstance = null;
-		try {
-			brushInstance = brush.getConstructor(LifeWorld.class).newInstance(world);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+	// 2d Bresenham line drawing algorithm
+	private void line(int x, int y, int x2, int y2, int other, Plane plane, Brush brush) {
 		int w = x2 - x;
 		int h = y2 - y;
 		int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
@@ -59,16 +48,13 @@ public class DrawingHelper {
 		for(int i = 0; i <= longest; i++) {
 			switch(plane) {
 			case XY:
-				brushInstance.draw(x, y, other);
-				//world.set(x, y, other);
+				brush.draw(x, y, other);
 				break;
 			case YZ:
-				brushInstance.draw(other, y, x);
-				//world.set(other, y, x);
+				brush.draw(other, y, x);
 				break;
 			case XZ:
-				brushInstance.draw(x, other, y);
-				//world.set(x, other, y);
+				brush.draw(x, other, y);
 				break;
 			}
 			numerator += shortest;
@@ -80,6 +66,21 @@ public class DrawingHelper {
 			else {
 				x += dx2;
 				y += dy2;
+			}
+		}
+	}
+
+	/*
+	 * Some silly hard-coded shapes, etc.
+	 */
+
+	public void thickLine(int width, int ox, int oy, int oz) {
+		int half = width / 2;
+		for(int x = -half; x <= half; x++) {
+			for(int y = 0; y <= 1; y++) {
+				for(int z = 0; z <= 1; z++) {
+					world.set(ox+x, oy+y, oz+z);
+				}
 			}
 		}
 	}
