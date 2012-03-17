@@ -200,5 +200,5 @@ public class Grid {
 		return gridSize;
 	}
 
-	private enum Plane { XY, YZ, XZ }
+	public enum Plane { XY, YZ, XZ }
 }

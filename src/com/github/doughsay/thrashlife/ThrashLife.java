@@ -42,7 +42,8 @@ public class ThrashLife {
 		grid = new FastGrid(camera); // same
 
 		// put some initial cells for testing
-		draw.line(200, 0, 0, 0);
+		//draw.thickLine(200, 0, 0, 0);
+		draw.line(-10,0,0,10,0,0, BallBrush.class);
 		cubes.load(world.getAll()); // load the current world state as geometry
 
 		updateTitle();
@@ -140,7 +141,6 @@ public class ThrashLife {
 
 		// color pick
 		if(Mouse.isButtonDown(0)) {
-			Dimension d = gui.getCanvasDimensions();
 			int x = Mouse.getX();
 			int y = Mouse.getY();
 
